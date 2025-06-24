@@ -1,22 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- This sitemap is dynamically generated. Access the dynamic sitemap at /supabase/functions/dynamic-sitemap -->
   <url>
-    <loc>http://localhost:5173/</loc>
+    <loc>https://slangpress.netlify.app/</loc>
     <lastmod>2025-06-24</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>http://localhost:5173/articles</loc>
+    <loc>https://slangpress.netlify.app/profile</loc>
     <lastmod>2025-06-24</lastmod>
-    <changefreq>daily</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>http://localhost:5173/profile</loc>
+    <loc>https://slangpress.netlify.app/articles</loc>
     <lastmod>2025-06-24</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://slangpress.netlify.app/article/breakthrough-in-quantum-computing-achieved</loc>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://slangpress.netlify.app/article/ai-revolutionizes-healthcare</loc>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://slangpress.netlify.app/article/exploring-the-depths-of-space</loc>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://slangpress.netlify.app/article/renewable-energy-innovations</loc>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://slangpress.netlify.app/article/the-future-of-transportation</loc>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>

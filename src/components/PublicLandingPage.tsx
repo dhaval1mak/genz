@@ -106,9 +106,21 @@ export default function PublicLandingPage({ user, userPreferences, onSignOut }: 
 
   const filterArticles = (data: Article[]) => {
     if (filter === 'trending') {
+      // Ensure we have numbers to compare - use 0 as default if property is undefined
       return data.filter(article => {
-        const totalLikes = article.likes_normal + article.likes_genz + article.likes_alpha;
-        return totalLikes > 100;
+        const normal = article.likes_normal || 0;
+        const genz = article.likes_genz || 0;
+        const alpha = article.likes_alpha || 0;
+        const totalLikes = normal + genz + alpha;
+        
+        // Lower the threshold if there are no trending articles
+        const threshold = 50;
+        return totalLikes >= threshold;
+      }).sort((a, b) => {
+        // Sort by total likes descending
+        const likesA = (a.likes_normal || 0) + (a.likes_genz || 0) + (a.likes_alpha || 0);
+        const likesB = (b.likes_normal || 0) + (b.likes_genz || 0) + (b.likes_alpha || 0);
+        return likesB - likesA;
       });
     }
     if (filter === 'latest') {
@@ -812,15 +824,16 @@ function PublicNewsCard({
               </div>
             </div>
           </div>
-          {article.image_url && (
-            <div className="ml-4 flex-shrink-0">
-              <img
-                src={article.image_url}
-                alt={article.title}
-                className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          )}
+          <div className="ml-4 flex-shrink-0">
+            <img
+              src={article.image_url || 'https://via.placeholder.com/300x200?text=News+Article'}
+              alt={article.title}
+              onError={(e) => {
+                e.currentTarget.src = 'https://via.placeholder.com/300x200?text=News+Article';
+              }}
+              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
         </div>
 
         <div className="mb-4">

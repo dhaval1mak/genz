@@ -76,17 +76,30 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
     return `${Math.floor(hours / 24)}d ago`;
   };
 
-  const handleInteraction = (action: string) => {
+  const handleLike = async (articleId: string, style: StyleType) => {
     if (!user) {
       setShowAuthPrompt(true);
       return;
     }
-    // Handle the interaction for logged-in users
-    console.log(`${action} by logged-in user`);
-  };
-
-  const handleLike = async (articleId: string, style: StyleType) => {
-    handleInteraction('like');
+    
+    try {
+      // In a real app, you would update the database here
+      // For now, we'll just update the state
+      setArticle(prev => {
+        if (!prev) return prev;
+        
+        return {
+          ...prev,
+          likes_normal: style === 'normal' ? prev.likes_normal + 1 : prev.likes_normal,
+          likes_genz: style === 'genz' ? prev.likes_genz + 1 : prev.likes_genz,
+          likes_alpha: style === 'alpha' ? prev.likes_alpha + 1 : prev.likes_alpha
+        };
+      });
+      
+      console.log(`Liked article ${articleId} with style ${style}`);
+    } catch (error) {
+      console.error('Error liking article:', error);
+    }
   };
 
   const handleComment = async (articleId: string, comment: { name: string; email: string; text: string; style: StyleType }) => {
@@ -139,14 +152,15 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={article.category} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="article" />
-        <meta property="og:image" content={article.image_url || 'https://alpha-z.netlify.app/og-image.jpg'} />
+        <meta property="og:image" content={article.image_url || 'https://slangpress.netlify.app/default-og-image.jpg'} />
         <meta property="article:published_time" content={article.published_at} />
         <meta property="article:section" content={article.category} />
-        <link rel="canonical" href={`https://alpha-z.netlify.app/article/${article.slug}`} />
-        
+        <link rel="canonical" href={`https://slangpress.netlify.app/article/${article.slug}`} />
+
         {/* JSON-LD Structured Data */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -159,19 +173,19 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
             "dateModified": article.created_at,
             "author": {
               "@type": "Organization",
-              "name": article.rss_source
+              "name": "GenZ News"
             },
             "publisher": {
               "@type": "Organization",
               "name": "GenZ News",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://alpha-z.netlify.app/logo.png"
+                "url": "https://slangpress.netlify.app/logo.png"
               }
             },
             "mainEntityOfPage": {
               "@type": "WebPage",
-              "@id": `https://alpha-z.netlify.app/article/${article.slug}`
+              "@id": `https://slangpress.netlify.app/article/${article.slug}`
             }
           })}
         </script>
@@ -300,15 +314,16 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
                     </div>
                   </div>
                 </div>
-                {article.image_url && (
-                  <div className="ml-6 flex-shrink-0">
-                    <img
-                      src={article.image_url}
-                      alt={article.title}
-                      className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-xl shadow-lg"
-                    />
-                  </div>
-                )}
+                <div className="ml-6 flex-shrink-0">
+                  <img
+                    src={article.image_url || 'https://via.placeholder.com/300x200?text=News+Article'}
+                    alt={article.title}
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/300x200?text=News+Article';
+                    }}
+                    className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-xl shadow-lg"
+                  />
+                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
