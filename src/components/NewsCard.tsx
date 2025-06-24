@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import ToggleTabs from './ToggleTabs';
@@ -29,7 +29,7 @@ export default function NewsCard({
 }: NewsCardProps) {
   const [activeStyle, setActiveStyle] = useState<StyleType>(defaultStyle);
   const [showComments, setShowComments] = useState(false);
-  const { theme } = useTheme();
+  const { theme: _ } = useTheme();
 
   const getContent = () => {
     switch (activeStyle) {
@@ -37,6 +37,19 @@ export default function NewsCard({
       case 'alpha': return article.alpha;
       default: return article.normal;
     }
+  };
+
+  // Truncate content to first 100 words for the feed/homepage
+  const getPreviewContent = () => {
+    const content = getContent();
+    const words = content.split(/\s+/);
+    const wordLimit = 100;
+    
+    if (words.length <= wordLimit) {
+      return content;
+    }
+    
+    return words.slice(0, wordLimit).join(' ') + '...';
   };
 
   const getStyleBadge = () => {
@@ -84,12 +97,6 @@ export default function NewsCard({
     return `${Math.floor(hours / 24)}d ago`;
   };
 
-  // Truncate content for preview
-  const getPreviewContent = () => {
-    const content = getContent();
-    return content.length > 200 ? content.substring(0, 200) + '...' : content;
-  };
-
   return (
     <motion.article
       initial={{ opacity: 0, y: 20 }}
@@ -98,15 +105,15 @@ export default function NewsCard({
       className="bg-white/80 dark:bg-gray-900/40 backdrop-blur-lg border border-gray-200/50 dark:border-gray-800/50 rounded-2xl overflow-hidden hover:border-gray-300/50 dark:hover:border-gray-700/50 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/5 dark:hover:shadow-purple-500/10"
     >
       {/* Header */}
-      <div className="p-6 pb-4">
-        <div className="flex items-start justify-between mb-4">
+      <div className="p-7 pb-5">
+        <div className="flex items-start justify-between mb-5">
           <div className="flex-1">
             <Link to={`/article/${article.slug}`}>
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-3 leading-tight hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4 leading-tight hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
                 {article.title}
               </h2>
             </Link>
-            <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 mb-4">
               <div className="flex items-center gap-1">
                 <Clock size={14} />
                 {formatDate(article.published_at)}
@@ -122,7 +129,7 @@ export default function NewsCard({
             </div>
           </div>
           {article.image_url && (
-            <div className="ml-4 flex-shrink-0">
+            <div className="ml-5 flex-shrink-0">
               <img
                 src={article.image_url}
                 alt={article.title}
@@ -132,7 +139,7 @@ export default function NewsCard({
           )}
         </div>
 
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <ToggleTabs
             activeStyle={activeStyle}
             onStyleChange={setActiveStyle}
@@ -143,7 +150,7 @@ export default function NewsCard({
       </div>
 
       {/* Content Preview */}
-      <div className="px-6 pb-4">
+      <div className="px-7 pb-5">
         <motion.div
           key={activeStyle}
           initial={{ opacity: 0, y: 10 }}
@@ -151,15 +158,15 @@ export default function NewsCard({
           transition={{ duration: 0.3 }}
           className="prose prose-invert max-w-none"
         >
-          <p className={getContentStyle()}>
+          <p className={`${getContentStyle()} mb-4`}>
             {getPreviewContent()}
           </p>
           <Link 
             to={`/article/${article.slug}`}
-            className="inline-flex items-center gap-1 text-purple-500 hover:text-purple-600 dark:text-purple-400 dark:hover:text-purple-300 text-sm font-medium mt-2 transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-lg hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-200 mt-4"
           >
             Read full article
-            <ExternalLink size={14} />
+            <ExternalLink size={16} />
           </Link>
         </motion.div>
       </div>

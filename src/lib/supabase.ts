@@ -215,6 +215,25 @@ export const createArticle = async (articleData: Omit<Article, 'id' | 'created_a
   return { data, error };
 };
 
+export const createArticleWithSlug = async (articleData: Omit<Article, 'id' | 'created_at'>) => {
+  // Generate a proper slug from the title
+  const slug = articleData.title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+    .trim(); // Trim leading/trailing spaces
+  
+  // Add the slug to the article data
+  const articleWithSlug = {
+    ...articleData,
+    slug,
+  };
+  
+  // Insert the article into the database
+  return await createArticle(articleWithSlug);
+};
+
 export const getRSSFeeds = async () => {
   const { data, error } = await supabase
     .from('rss_feeds')

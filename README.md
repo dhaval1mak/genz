@@ -15,6 +15,20 @@ A modern, AI-powered news aggregator that transforms traditional news into Gen-Z
   - Share functionality
   - Real-time reactions
 
+- **SEO & Crawlability**:
+  - Individual article pages with unique URLs (slugs)
+  - Optimized meta tags and structured data
+  - Dynamic sitemap generation for search engines
+  
+- **Automated Content Pipeline**:
+  - Advanced RSS feed aggregation from 25+ trusted sources
+  - Intelligent scheduling based on source update patterns
+  - Gemini AI-powered content rewriting with robust fallback mechanisms
+  - Category-specific default images for visual consistency
+  - Static HTML generation for search engines
+  - Dynamic sitemap generation
+  - Proper canonical URLs
+
 - **Modern UI/UX**:
   - Mobile-first responsive design
   - Smooth animations and micro-interactions
@@ -188,11 +202,63 @@ Add your RSS feed URLs to the system. The application will:
 
 ## 🚀 Deployment
 
+### Frontend Deployment
+
 The application is optimized for Vercel deployment:
 
 1. Connect your GitHub repository to Vercel
 2. Set environment variables in Vercel dashboard
 3. Deploy automatically on push to main branch
+
+### RSS System Deployment
+
+For the RSS processing system and article counter:
+
+#### On Linux/Mac:
+
+```bash
+npm run deploy-git
+```
+
+#### On Windows:
+
+```powershell
+npm run deploy-win
+```
+
+Both options will automatically:
+- Pull the latest code from your repository
+- Set up the RSS processor and scheduler
+- Deploy the article stats feature
+- Configure automatic updates
+
+For more details, see [Git Deployment Guide](GIT_DEPLOYMENT_GUIDE.md)
+
+### Pushing Code to Git
+
+To push your code changes to the Git repository:
+
+#### On Linux/Mac:
+
+```bash
+npm run git-push
+```
+
+#### On Windows:
+
+```powershell
+npm run git-push-win
+```
+
+You can also specify a custom commit message:
+
+```bash
+# Linux/Mac
+./git_push.sh "Your custom commit message"
+
+# Windows
+.\Git-Push.ps1 "Your custom commit message"
+```
 
 ## 📊 Performance
 
@@ -200,6 +266,135 @@ The application is optimized for Vercel deployment:
 - **Core Web Vitals**: Optimized for mobile
 - **Bundle Size**: Code-split and optimized
 - **Loading**: Infinite scroll with intersection observer
+
+## 🔍 SEO & Crawlability
+
+The application is designed to be fully crawlable by search engines, ensuring that each article has its own unique URL and can be indexed individually.
+
+### Individual Article Pages
+
+- Each article has a unique URL based on its slug: `/article/:slug`
+- The app renders proper SEO metadata through React Helmet
+- JSON-LD structured data is included for rich search results
+
+### Static HTML Generation
+
+For better search engine crawling, the build process generates static HTML files for each article:
+
+1. The `generateStaticArticles.mjs` script fetches all articles from Supabase
+2. For each article, it creates a static HTML file with:
+   - Complete article content
+   - All necessary meta tags
+   - JSON-LD structured data
+   - Basic styling for readability
+
+These static HTML files are available at `/article/:slug.html` and provide search engines with a crawlable version of each article.
+
+### Dynamic Sitemap
+
+A sitemap is automatically generated during the build process:
+
+1. The `updateSitemap.mjs` script creates a complete sitemap with:
+   - All static routes (homepage, profile, etc.)
+   - All article pages with their unique slugs
+   - Last modified dates
+   - Change frequency and priority
+
+The sitemap is available at `/sitemap.xml` and is referenced in `robots.txt`.
+
+### Running the SEO Tools
+
+To manually generate the static article files and sitemap:
+
+```bash
+# Generate static article HTML files
+npm run generate-static
+
+# Update the sitemap
+npm run update-sitemap
+
+# Or run both during build
+npm run build
+```
+
+## 🔍 Enhanced SEO & Static Article Generation
+
+The application includes an enhanced static article generation system that creates crawlable HTML pages for search engines:
+
+### Static Article Generator Features
+
+- **Command-line Interface**: Flexible options for generating static pages
+- **Content Styles**: Generates static pages with all available content styles (Normal, GenZ, Alpha)
+- **Proper HTML Sanitization**: Secures content while preserving formatting
+- **Optimized SEO Metadata**: Comprehensive meta tags for better search ranking
+- **Structured Data**: Rich JSON-LD markup for enhanced search results
+- **Automatic Sitemaps**: Generates dedicated article sitemaps
+- **Robots.txt Management**: Ensures proper search engine directives
+- **Performance Optimizations**: Batch processing for large article sets
+- **Smart Caching**: Skips existing files unless forced to regenerate
+
+### Usage
+
+```bash
+# Basic usage (generates all articles)
+node generateStaticArticles.mjs
+
+# Generate only the 10 most recent articles
+node generateStaticArticles.mjs --limit 10
+
+# Generate only articles in a specific category
+node generateStaticArticles.mjs --category Technology
+
+# Force regeneration of all articles
+node generateStaticArticles.mjs --force
+
+# Show detailed output
+node generateStaticArticles.mjs --verbose
+
+# Show help information
+node generateStaticArticles.mjs --help
+```
+
+### Integration with Build Process
+
+The static article generation is automatically integrated into the build process:
+
+```json
+"scripts": {
+  "build": "vite build && node generateStaticArticles.mjs",
+  "postbuild": "node updateSitemap.mjs && node checkRobotsTxt.mjs",
+  "fetch-rss": "node processRSSFeeds.mjs",
+  "schedule-rss": "node rssScheduler.mjs",
+  "analyze-rss": "node analyzeFeedPatterns.mjs"
+}
+```
+
+This ensures that all article pages are generated and properly referenced in the sitemap and robots.txt files during each build. The additional scripts handle RSS feed processing and scheduling.
+
+## 📰 RSS Feed System
+
+The project includes a robust RSS feed processing system that automatically fetches and processes news articles from multiple sources. See the [RSS System Documentation](./RSS_SYSTEM_DOCS.md) for detailed information.
+
+### Features
+
+- **Multiple News Sources**: 25+ curated RSS feeds across various categories
+- **AI-Powered Content Transformation**: Uses Gemini API to rewrite content in three styles
+- **Intelligent Scheduling**: Analyzes feed update patterns to optimize fetching frequency
+- **Fallback Mechanisms**: Robust error handling and content fallbacks
+- **Category-Based Images**: Default images for each content category
+
+### Usage
+
+```bash
+# Fetch articles from all RSS feeds (one-time)
+npm run fetch-rss
+
+# Start the scheduler for automatic updates
+npm run schedule-rss
+
+# Analyze RSS feed update patterns
+npm run analyze-rss
+```
 
 ## 🤝 Contributing
 

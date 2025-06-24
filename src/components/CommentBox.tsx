@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Send, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
@@ -25,7 +25,7 @@ export default function CommentBox({
     email: '',
     text: ''
   });
-  const { theme } = useTheme();
+  const { theme: _ } = useTheme(); // Unused but keeping context available
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

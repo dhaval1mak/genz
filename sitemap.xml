@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  This static sitemap.xml file provides basic URLs and redirects to the dynamic sitemap.
+  The dynamic sitemap is generated from the database and includes all articles.
+  For the full, always up-to-date sitemap, visit:
+  https://slangpress.netlify.app/sitemap.xml
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://slangpress.netlify.app/</loc>

@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { useInView } from 'react-intersection-observer';
 import { 
   Zap, User, LogIn, UserPlus, Sun, Moon, TrendingUp, Clock, Filter, Menu, X, 
   Heart, MessageCircle, Share2, ExternalLink, Sparkles, BookOpen, Globe,
-  Rss, Bell, Star, ArrowRight, Play, ChevronDown, Users, Award, Shield
+  Rss, Bell, Star, ArrowRight, Play, Users, Shield
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Article, getArticles } from '../lib/supabase';
 import ToggleTabs from './ToggleTabs';
+import ArticleCounter from './ArticleCounter';
 
 type StyleType = 'normal' | 'genz' | 'alpha';
 
@@ -20,7 +21,7 @@ interface PublicLandingPageProps {
   onSignOut: () => void;
 }
 
-export default function PublicLandingPage({ user, userPreferences, onSignOut }: PublicLandingPageProps) {
+export default function PublicLandingPage({ user, onSignOut }: PublicLandingPageProps) {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
@@ -30,7 +31,6 @@ export default function PublicLandingPage({ user, userPreferences, onSignOut }: 
   const [currentPage, setCurrentPage] = useState(0);
   const [totalArticles, setTotalArticles] = useState(0);
   const { theme, toggleTheme } = useTheme();
-  const navigate = useNavigate();
 
   const { ref, inView } = useInView({
     threshold: 0,
@@ -138,17 +138,6 @@ export default function PublicLandingPage({ user, userPreferences, onSignOut }: 
     console.log(`${action} by logged-in user`);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    
-    if (hours < 1) return 'Just now';
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
-  };
-
   const features = [
     {
       icon: Sparkles,
@@ -218,14 +207,18 @@ export default function PublicLandingPage({ user, userPreferences, onSignOut }: 
 
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center gap-6">
-                <motion.div 
-                  className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-green-700 dark:text-green-400 font-medium text-sm">Live</span>
-                </motion.div>
+                <div className="flex items-center gap-4">
+                  <motion.div 
+                    className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span className="text-green-700 dark:text-green-400 font-medium text-sm">Live</span>
+                  </motion.div>
+                  
+                  <ArticleCounter className="text-gray-700 dark:text-gray-300" />
+                </div>
                 
                 <button
                   onClick={toggleTheme}
@@ -315,9 +308,12 @@ export default function PublicLandingPage({ user, userPreferences, onSignOut }: 
                 >
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span className="text-green-700 dark:text-green-400 font-medium text-sm">Live</span>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2 px-3 py-1 bg-green-100 dark:bg-green-900/30 rounded-full">
+                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                          <span className="text-green-700 dark:text-green-400 font-medium text-sm">Live</span>
+                        </div>
+                        <ArticleCounter className="ml-1 text-gray-700 dark:text-gray-300" />
                       </div>
                       <button
                         onClick={toggleTheme}
@@ -465,9 +461,9 @@ export default function PublicLandingPage({ user, userPreferences, onSignOut }: 
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.8 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16"
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20"
             >
-              {stats.map((stat, index) => (
+              {stats.map((stat) => (
                 <motion.div
                   key={stat.label}
                   className="bg-white/60 dark:bg-gray-900/40 backdrop-blur-lg border border-gray-200/50 dark:border-gray-800/50 rounded-2xl p-6 text-center"
@@ -638,7 +634,6 @@ export default function PublicLandingPage({ user, userPreferences, onSignOut }: 
                 key={article.id}
                 article={article}
                 onInteraction={handleInteraction}
-                isLoggedIn={!!user}
                 index={index}
               />
             ))}
@@ -759,12 +754,10 @@ export default function PublicLandingPage({ user, userPreferences, onSignOut }: 
 function PublicNewsCard({ 
   article, 
   onInteraction, 
-  isLoggedIn, 
   index 
 }: { 
   article: Article; 
   onInteraction: (action: string) => void; 
-  isLoggedIn: boolean;
   index: number;
 }) {
   const [activeStyle, setActiveStyle] = useState<StyleType>('normal');
@@ -826,10 +819,10 @@ function PublicNewsCard({
           </div>
           <div className="ml-4 flex-shrink-0">
             <img
-              src={article.image_url || 'https://via.placeholder.com/300x200?text=News+Article'}
+              src={article.image_url || '/images/placeholder.svg'}
               alt={article.title}
               onError={(e) => {
-                e.currentTarget.src = 'https://via.placeholder.com/300x200?text=News+Article';
+                e.currentTarget.src = '/images/placeholder.svg';
               }}
               className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300"
             />

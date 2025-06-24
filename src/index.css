@@ -10,6 +10,20 @@
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+}
+
+/* Add more breathing space to headings */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.3;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+}
+
+/* Add spacing to paragraphs */
+p {
+  margin-bottom: 1.5rem;
 }
 
 /* Dark mode class for html element */

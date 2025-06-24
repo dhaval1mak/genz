@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
@@ -65,6 +65,50 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
     }
   };
 
+  // Format content to show 250 words on article detail page
+  const getFormattedContent = () => {
+    if (!article) return '';
+    
+    const content = getContent();
+    const words = content.split(/\s+/);
+    const wordLimit = 250;
+    
+    if (words.length <= wordLimit) {
+      return content;
+    }
+    
+    const summary = words.slice(0, wordLimit).join(' ') + '...';
+    
+    return (
+      <>
+        <div>{summary}</div>
+        {article.original_url && (
+          <div className="mt-4">
+            <a 
+              href={article.original_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-lg hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 transition-all duration-200"
+            >
+              Read Full Article <ExternalLink size={16} />
+            </a>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  // Generate a clean text excerpt for SEO description
+  const getArticleExcerpt = () => {
+    if (!article) return '';
+    // Get content based on active style
+    const content = getContent();
+    // Remove HTML tags and limit to ~160 chars for meta description
+    const textContent = content.replace(/<[^>]*>/g, '');
+    return textContent.length > 160 ? textContent.substring(0, 157) + '...' : textContent;
+  };
+
+  // Format date for display and SEO
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -74,6 +118,12 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
     if (hours < 1) return 'Just now';
     if (hours < 24) return `${hours}h ago`;
     return `${Math.floor(hours / 24)}d ago`;
+  };
+
+  // Format date for SEO (ISO format)
+  const formatISODate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toISOString();
   };
 
   const handleLike = async (articleId: string, style: StyleType) => {
@@ -145,7 +195,7 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
   }
 
   const pageTitle = `${article.title} - GenZ News`;
-  const pageDescription = getContent().substring(0, 160) + '...';
+  const pageDescription = getArticleExcerpt();
 
   return (
     <>
@@ -157,7 +207,7 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
         <meta property="og:description" content={pageDescription} />
         <meta property="og:type" content="article" />
         <meta property="og:image" content={article.image_url || 'https://slangpress.netlify.app/default-og-image.jpg'} />
-        <meta property="article:published_time" content={article.published_at} />
+        <meta property="article:published_time" content={formatISODate(article.published_at)} />
         <meta property="article:section" content={article.category} />
         <link rel="canonical" href={`https://slangpress.netlify.app/article/${article.slug}`} />
 
@@ -169,8 +219,8 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
             "headline": article.title,
             "description": pageDescription,
             "image": article.image_url,
-            "datePublished": article.published_at,
-            "dateModified": article.created_at,
+            "datePublished": formatISODate(article.published_at),
+            "dateModified": formatISODate(article.created_at),
             "author": {
               "@type": "Organization",
               "name": "GenZ News"
@@ -286,17 +336,17 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
         </div>
 
         {/* Article Content */}
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-4 py-10">
           <motion.article
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/80 dark:bg-gray-900/40 backdrop-blur-lg border border-gray-200/50 dark:border-gray-800/50 rounded-2xl overflow-hidden shadow-xl"
           >
             {/* Article Header */}
-            <div className="p-6 sm:p-8">
-              <div className="flex items-start justify-between mb-6">
+            <div className="p-8 sm:p-10">
+              <div className="flex items-start justify-between mb-8">
                 <div className="flex-1">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-4 leading-tight">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white mb-6 leading-tight">
                     {article.title}
                   </h1>
                   <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-sm text-gray-500 dark:text-gray-400 mb-6">
@@ -316,29 +366,29 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
                 </div>
                 <div className="ml-6 flex-shrink-0">
                   <img
-                    src={article.image_url || 'https://via.placeholder.com/300x200?text=News+Article'}
+                    src={article.image_url || '/images/placeholder.svg'}
                     alt={article.title}
                     onError={(e) => {
-                      e.currentTarget.src = 'https://via.placeholder.com/300x200?text=News+Article';
+                      e.currentTarget.src = '/images/placeholder.svg';
                     }}
                     className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-xl shadow-lg"
                   />
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 mb-8">
                 <ToggleTabs
                   activeStyle={activeStyle}
                   onStyleChange={setActiveStyle}
                   className="max-w-xs"
                 />
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   {article.original_url && (
                     <a
                       href={article.original_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white bg-gray-100 dark:bg-gray-800/50 rounded-full transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white bg-gray-100 dark:bg-gray-800/50 rounded-full transition-colors"
                     >
                       <ExternalLink size={14} />
                       <span className="hidden sm:inline">Source</span>
@@ -352,7 +402,7 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
                         url: window.location.href
                       }) || navigator.clipboard.writeText(window.location.href);
                     }}
-                    className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white bg-gray-100 dark:bg-gray-800/50 rounded-full transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white bg-gray-100 dark:bg-gray-800/50 rounded-full transition-colors"
                   >
                     <Share2 size={14} />
                     <span className="hidden sm:inline">Share</span>
@@ -362,7 +412,7 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
             </div>
 
             {/* Article Content */}
-            <div className="px-6 sm:px-8 pb-6">
+            <div className="px-8 sm:px-10 pb-8">
               <motion.div
                 key={activeStyle}
                 initial={{ opacity: 0, y: 10 }}
@@ -377,7 +427,7 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
                     ? 'text-orange-800 dark:text-orange-100'
                     : 'text-gray-700 dark:text-gray-200'
                 }`}>
-                  {getContent()}
+                  {getFormattedContent()}
                 </div>
               </motion.div>
             </div>

@@ -1,13 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import NewsCard from './NewsCard';
-import { Comment, getCurrentUser } from '../lib/supabase';
+import { Comment } from '../lib/supabase';
 import { useNewsData } from '../hooks/useNewsData';
 import { useTheme } from '../contexts/ThemeContext';
-import { Loader2, Zap, TrendingUp, Settings, LogOut, User, Sun, Moon, Filter, RefreshCw, Clock } from 'lucide-react';
+import { Loader2, Zap, TrendingUp, LogOut, User, Sun, Moon, Filter, RefreshCw, Clock } from 'lucide-react';
 
 type StyleType = 'normal' | 'genz' | 'alpha';
 
@@ -269,9 +269,9 @@ export default function FeedScroller({ userPreferences, onSignOut, user }: FeedS
         </div>
 
         {/* Feed */}
-        <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto px-4 py-10">
           <AnimatePresence>
-            <div className="space-y-8">
+            <div className="space-y-10">
               {filteredArticles.map((article, index) => (
                 <motion.div
                   key={article.id}
