@@ -25,60 +25,19 @@ const parser = new Parser({
   maxRedirects: 5,
 });
 
-// Comprehensive RSS feeds organized by category
+// Prioritized RSS feeds (most reliable ones first)
 const rssFeeds = [
-  // General & Breaking News
-  { name: 'AP News', url: 'https://apnews.com/index.rss', category: 'World' },
-  { name: 'CNN Top Stories', url: 'http://rss.cnn.com/rss/cnn_topstories.rss', category: 'World' },
-  { name: 'NY Times', url: 'http://feeds.nytimes.com/nyt/rss/HomePage', category: 'World' },
-  { name: 'NBC News', url: 'https://feeds.nbcnews.com/nbcnews/public/rss/topstories.xml', category: 'World' },
-  { name: 'ABC News', url: 'http://abcnews.go.com/abcnews/topstories_rss', category: 'World' },
-  { name: 'Reuters', url: 'https://www.reutersagency.com/feed/?best-topics=top-news', category: 'World' },
-  { name: 'NPR', url: 'https://www.npr.org/rss/rss.php?id=1001', category: 'World' },
-  { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', category: 'World' },
-  { name: 'Deutsche Welle', url: 'https://rss.dw.com/rdf/rss-en-all', category: 'World' },
-  { name: 'The Guardian', url: 'https://www.theguardian.com/world/rss', category: 'World' },
-
-  // Business & Finance
-  { name: 'CNBC', url: 'https://www.cnbc.com/id/100003114/device/rss/rss.html', category: 'Business' },
-  { name: 'BBC Business', url: 'https://feeds.bbci.co.uk/news/business/rss.xml', category: 'Business' },
-  { name: 'Investing.com', url: 'https://www.investing.com/rss/news_25.rss', category: 'Business' },
-  { name: 'MarketWatch', url: 'https://www.marketwatch.com/rss/topstories', category: 'Business' },
-  { name: 'Politico', url: 'https://www.politico.com/rss/politicopicks.xml', category: 'Politics' },
-
-  // Technology & Startups
-  { name: 'TechCrunch', url: 'http://feeds.feedburner.com/TechCrunch/', category: 'Technology' },
-  { name: 'Wired', url: 'http://feeds.wired.com/wired/index', category: 'Technology' },
+  // Most reliable feeds first
+  { name: 'TechCrunch', url: 'https://techcrunch.com/feed/', category: 'Technology' },
+  { name: 'BBC News', url: 'http://feeds.bbci.co.uk/news/rss.xml', category: 'World' },
   { name: 'The Verge', url: 'https://www.theverge.com/rss/index.xml', category: 'Technology' },
-  { name: 'Engadget', url: 'https://www.engadget.com/rss.xml', category: 'Technology' },
-  { name: 'Ars Technica', url: 'http://feeds.arstechnica.com/arstechnica/index', category: 'Technology' },
-  { name: 'MIT Tech Review', url: 'http://www.technologyreview.com/stream/rss/', category: 'Technology' },
-  { name: 'The Next Web', url: 'https://thenextweb.com/feed/', category: 'Technology' },
-  { name: 'Android Authority', url: 'https://www.androidauthority.com/feed/', category: 'Technology' },
-  { name: '9to5Mac', url: 'https://9to5mac.com/feed/', category: 'Technology' },
-  { name: 'Techmeme', url: 'https://techmeme.com/feed.xml', category: 'Technology' },
-
-  // Sports
-  { name: 'ESPN', url: 'http://sports.espn.go.com/espn/rss/news', category: 'Sports' },
-  { name: 'CBS Sports', url: 'http://www.cbssports.com/partners/feeds/rss/home_news', category: 'Sports' },
-  { name: 'Sky Sports', url: 'https://www.skysports.com/rss/12040', category: 'Sports' },
-  { name: 'Sporting News', url: 'https://www.sportingnews.com/us/rss', category: 'Sports' },
-  { name: 'Guardian Football', url: 'https://www.theguardian.com/football/rss', category: 'Sports' },
-  { name: 'BBC Sport', url: 'https://www.bbc.com/sport/0/rss.xml', category: 'Sports' },
-  { name: 'RotoWire', url: 'https://www.rotowire.com/rss.xml', category: 'Sports' },
-
-  // Science & Innovation
-  { name: 'Science Daily', url: 'http://feeds.sciencedaily.com/sciencedaily/top_news', category: 'Science' },
-  { name: 'Nature Technology', url: 'https://www.nature.com/subjects/technology.rss', category: 'Science' },
-  { name: 'Scientific American', url: 'https://rss.sciam.com/ScientificAmerican-News', category: 'Science' },
-  { name: 'New Scientist', url: 'https://www.newscientist.com/feed/home/', category: 'Science' },
-  { name: 'Space Headlines', url: 'https://feeds.feedburner.com/spaceheadlines', category: 'Science' },
-
-  // Culture & Media
-  { name: 'Rolling Stone', url: 'https://www.rollingstone.com/feed/', category: 'Entertainment' },
-  { name: 'NY Times Arts', url: 'https://www.nytimes.com/services/xml/rss/nyt/Arts.xml', category: 'Entertainment' },
-  { name: 'Vulture', url: 'https://www.vulture.com/rss/index.xml', category: 'Entertainment' },
-  { name: 'Pitchfork', url: 'https://pitchfork.com/rss/news/', category: 'Entertainment' },
+  { name: 'Science Daily', url: 'https://www.sciencedaily.com/rss/all.xml', category: 'Science' },
+  { name: 'CNN', url: 'http://rss.cnn.com/rss/edition.rss', category: 'World' },
+  
+  // Secondary feeds (may have issues)
+  { name: 'Wired', url: 'https://www.wired.com/feed/rss', category: 'Technology' },
+  { name: 'Polygon', url: 'https://www.polygon.com/rss/index.xml', category: 'Gaming' },
+  { name: 'Forbes', url: 'https://www.forbes.com/business/feed/', category: 'Business' },
 ];
 
 // Batch processing for Gemini API to reduce API calls
@@ -204,8 +163,10 @@ async function processSingleFeed(feed) {
     console.log(`📡 Processing feed: ${feed.name}`);
     
     const feedData = await parser.parseURL(feed.url);
-    console.log(`  Found ${feedData.items.length} items`);    // Get top 1 item per feed (optimized for large feed count)
-    const items = feedData.items.slice(0, 1);
+    console.log(`  Found ${feedData.items.length} items`);
+
+    // Get top 2 items (reduced from 3)
+    const items = feedData.items.slice(0, 2);
     
     // Prepare articles for batch processing
     const articlesToProcess = [];
@@ -307,11 +268,10 @@ async function updateSiteStats(totalArticles, newArticlesAdded) {
 
 async function processRSSFeeds() {
   console.log('🚀 Starting optimized RSS feed processing...');
-  console.log(`📊 Processing ${rssFeeds.length} RSS feeds with parallel processing`);
   const startTime = Date.now();
   
-  // Process feeds concurrently with increased concurrency for large feed list
-  const results = await processFeedsConcurrently(rssFeeds, 5); // Increased from 3 to 5
+  // Process feeds concurrently
+  const results = await processFeedsConcurrently(rssFeeds, 3);
   
   // Calculate totals
   let totalProcessed = 0;
@@ -331,7 +291,6 @@ async function processRSSFeeds() {
   console.log(`\n🎉 RSS processing complete in ${duration}s!`);
   console.log(`✅ Successfully processed: ${totalProcessed} articles`);
   console.log(`❌ Errors encountered: ${totalErrors}`);
-  console.log(`📈 Success rate: ${Math.round((results.length - totalErrors) / results.length * 100)}%`);
   
   // Update stats
   const { count: finalCount } = await supabase
