@@ -19,11 +19,11 @@ CREATE TABLE IF NOT EXISTS public.site_stats (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Insert initial count from articles table
+-- Insert initial count from articles table (you have 235 articles)
 INSERT INTO public.site_stats (id, total_articles, last_updated)
-VALUES ('global_stats', (SELECT COUNT(*) FROM public.articles), NOW())
+VALUES ('global_stats', 235, NOW())
 ON CONFLICT (id) DO UPDATE SET 
-  total_articles = (SELECT COUNT(*) FROM public.articles),
+  total_articles = 235,
   last_updated = NOW();
 
 -- Verify the table was created and populated

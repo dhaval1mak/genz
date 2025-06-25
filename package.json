@@ -22,6 +22,7 @@
     "verify-stats": "node verify_site_stats.mjs",
     "create-stats-table": "node create_site_stats_table.mjs",
     "quick-fix-stats": "node quick_create_stats_table.mjs",
+    "test-stats": "node test_site_stats_after_fix.mjs",
     "deploy-rss": "sh deploy_rss_system.sh install",
     "deploy-git": "sh deploy_git_rss.sh",
     "deploy-win": "powershell -ExecutionPolicy Bypass -File .\\Deploy-GitRSS.ps1",
