@@ -32,7 +32,10 @@ jobs:
           
       - name: Update sitemap
         run: node updateSitemap.mjs
-        
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          
       - name: Commit and push if there are changes
         run: |
           git config --local user.email "action@github.com"
