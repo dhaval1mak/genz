@@ -2,19 +2,21 @@ import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+// If not installed, run: npm install node-fetch
+import fetch from 'node-fetch';
 
 dotenv.config();
 
-// Supabase configuration
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
+// Use CI/CD env vars if available, else fallback to VITE_ for local dev
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+if (!supabaseUrl || !supabaseKey) {
   console.error('Missing Supabase credentials in environment variables');
   process.exit(1);
 }
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Base URL for the site
 const BASE_URL = 'https://slangpress.netlify.app';
@@ -54,6 +56,18 @@ const generateSitemapXml = (staticRoutes, articles) => {
 </urlset>`;
 };
 
+async function pingSearchEngines(sitemapUrl) {
+  const googlePing = `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+  const bingPing = `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`;
+  try {
+    await fetch(googlePing);
+    await fetch(bingPing);
+    console.log('Pinged Google and Bing with updated sitemap.');
+  } catch (err) {
+    console.error('Failed to ping search engines:', err);
+  }
+}
+
 async function updateSitemap() {
   try {
     console.log('Generating sitemap.xml...');
@@ -91,6 +105,9 @@ async function updateSitemap() {
     fs.writeFileSync(SITEMAP_PATH, sitemapXml);
     
     console.log(`Sitemap generated successfully at ${SITEMAP_PATH}`);
+
+    // Ping search engines
+    await pingSearchEngines(`${BASE_URL}/sitemap.xml`);
   } catch (error) {
     console.error('Error generating sitemap:', error);
     process.exit(1);
