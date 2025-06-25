@@ -1,10 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
 import Parser from 'rss-parser';
+import dotenv from 'dotenv';
 
-// Environment variables
-const supabaseUrl = 'https://fdnvfdkhhwdpkyomsvoq.supabase.co';
-const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkbnZmZGtoaHdkcGt5b21zdm9xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODE5NzM1MywiZXhwIjoyMDYzNzczMzUzfQ.dvbEOUkfEG-hucg4N-pBvCVO7DgGvpa6Hg3OE7YUajc';
-const geminiApiKey = 'AIzaSyD-Zsfm8b7KE0GGFEA2hxQoswtHhCth1t8';
+// Load environment variables from .env file (for local development)
+dotenv.config();
+
+// Environment variables - use environment variables or fallback to hardcoded for backwards compatibility
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://fdnvfdkhhwdpkyomsvoq.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkbnZmZGtoaHdkcGt5b21zdm9xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODE5NzM1MywiZXhwIjoyMDYzNzczMzUzfQ.dvbEOUkfEG-hucg4N-pBvCVO7DgGvpa6Hg3OE7YUajc';
+const geminiApiKey = process.env.GEMINI_API_KEY || 'AIzaSyD-Zsfm8b7KE0GGFEA2hxQoswtHhCth1t8';
+
+// Validate required environment variables
+if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
+  console.error('❌ Missing required environment variables:');
+  if (!supabaseUrl) console.error('  - SUPABASE_URL');
+  if (!supabaseServiceKey) console.error('  - SUPABASE_SERVICE_KEY');
+  if (!geminiApiKey) console.error('  - GEMINI_API_KEY');
+  process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const parser = new Parser({
@@ -393,17 +406,13 @@ async function processRSSFeeds() {
     .from('articles')
     .select('*', { count: 'exact', head: true });
     
-  if (countError) {
-    console.error(`❌ Error counting articles: ${countError.message}`);
+  if (countError) {    console.error(`❌ Error counting articles: ${countError.message}`);
   } else {
     console.log(`📊 Total articles in database: ${finalCount}`);
     
     // Update the site_stats table with the current count
     await updateSiteStats(finalCount, totalProcessed);
   }
-  
-  // Update the site_stats table with the current count
-  await updateSiteStats(finalCount.length, totalProcessed);
 }
 
 // Function to update site statistics
