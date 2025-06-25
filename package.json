@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node generateStaticArticles.mjs",
-    "postbuild": "node updateSitemap.mjs && node checkRobotsTxt.mjs",
+    "postbuild": "node updateSitemap.mjs && node checkRobotsTxt.mjs && node analyzeBundles.mjs",
+    "analyze": "node analyzeBundles.mjs",
     "generate-static": "node generateStaticArticles.mjs",
     "update-sitemap": "node updateSitemap.mjs",
     "check-robots": "node checkRobotsTxt.mjs",
@@ -55,6 +56,7 @@
     "globals": "^15.9.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
+    "terser": "^5.43.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^5.4.2"
