@@ -1,0 +1,8 @@
+# Netlify redirects for SPA routing
+# Ensure all article URLs are properly crawlable and indexable by search engines
+
+# Dynamic sitemap support
+/sitemap.xml  https://fdnvfdkhhwdpkyomsvoq.supabase.co/functions/v1/dynamic-sitemap  200
+
+# For client-side routing (SPA routing)
+/*    /index.html   200
