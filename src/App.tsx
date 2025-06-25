@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import AuthForm from './components/AuthForm';
-import OnboardingFlow from './components/OnboardingFlow';
-import FeedScroller from './components/FeedScroller';
-import ArticlePage from './components/ArticlePage';
-import ProfilePage from './components/ProfilePage';
-import PublicLandingPage from './components/PublicLandingPage';
+import { motion } from 'framer-motion';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { signUp, signIn, signOut, getCurrentUser, updateUserPreferences, getUserPreferences } from './lib/supabase';
 import { Loader2 } from 'lucide-react';
+
+// Dynamically import components with better chunking
+// Use named chunks for better debugging and cache management
+const AuthForm = lazy(() => import(/* webpackChunkName: "auth" */ './components/AuthForm'));
+const OnboardingFlow = lazy(() => import(/* webpackChunkName: "onboarding" */ './components/OnboardingFlow'));
+const FeedScroller = lazy(() => import(/* webpackChunkName: "feed" */ './components/FeedScroller'));
+const ArticlePage = lazy(() => import(/* webpackChunkName: "article" */ './components/ArticlePage'));
+const ProfilePage = lazy(() => import(/* webpackChunkName: "profile" */ './components/ProfilePage'));
+const PublicLandingPage = lazy(() => import(/* webpackChunkName: "landing" */ './components/PublicLandingPage'));
 
 type StyleType = 'normal' | 'genz' | 'alpha';
 
@@ -19,6 +22,18 @@ interface UserPreferences {
   onboarding_completed: boolean;
 }
 
+// Loading component for suspense fallback
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+    >
+      <Loader2 className="w-12 h-12 text-purple-500" />
+    </motion.div>
+  </div>
+);
+
 export default function App() {
   const [user, setUser] = useState<any>(null);
   const [userPreferences, setUserPreferences] = useState<UserPreferences | null>(null);
@@ -27,7 +42,17 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Pre-load critical components when the app starts
+    const preloadComponents = async () => {
+      const importPromises = [
+        import('./components/PublicLandingPage'),
+        import('./components/AuthForm')
+      ];
+      await Promise.all(importPromises);
+    };
+
     checkUser();
+    preloadComponents();
   }, []);
 
   const checkUser = async () => {
@@ -133,105 +158,107 @@ export default function App() {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
-        <Routes>
-          {/* Public Landing Page */}
-          <Route 
-            path="/" 
-            element={
-              <PublicLandingPage 
-                user={user}
-                userPreferences={userPreferences}
-                onSignOut={handleSignOut}
-              />
-            } 
-          />
-          
-          {/* Auth Routes */}
-          <Route 
-            path="/signup" 
-            element={
-              !user ? (
-                <AuthForm onAuth={handleAuth} loading={authLoading} isSignUp={true} />
-              ) : !userPreferences?.onboarding_completed ? (
-                <Navigate to="/onboarding" replace />
-              ) : (
-                <Navigate to="/feed" replace />
-              )
-            } 
-          />
-          <Route 
-            path="/login" 
-            element={
-              !user ? (
-                <AuthForm onAuth={handleAuth} loading={authLoading} isSignUp={false} />
-              ) : !userPreferences?.onboarding_completed ? (
-                <Navigate to="/onboarding" replace />
-              ) : (
-                <Navigate to="/feed" replace />
-              )
-            } 
-          />
-          
-          {/* Protected Routes */}
-          <Route 
-            path="/onboarding" 
-            element={
-              user && !userPreferences?.onboarding_completed ? (
-                <OnboardingFlow onComplete={handleOnboardingComplete} />
-              ) : user && userPreferences?.onboarding_completed ? (
-                <Navigate to="/feed" replace />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
-          />
-          
-          <Route 
-            path="/feed" 
-            element={
-              user && userPreferences?.onboarding_completed ? (
-                <FeedScroller 
-                  userPreferences={userPreferences} 
-                  onSignOut={handleSignOut}
+        <Suspense fallback={<LoadingSpinner />}>
+          <Routes>
+            {/* Public Landing Page */}
+            <Route 
+              path="/" 
+              element={
+                <PublicLandingPage 
                   user={user}
-                />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
-          />
-          
-          <Route 
-            path="/profile" 
-            element={
-              user && userPreferences?.onboarding_completed ? (
-                <ProfilePage 
-                  user={user} 
                   userPreferences={userPreferences}
                   onSignOut={handleSignOut}
-                  onUpdatePreferences={setUserPreferences}
                 />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
-          />
-          
-          {/* Article Page - Public but enhanced for logged in users */}
-          <Route 
-            path="/article/:slug" 
-            element={
-              <ArticlePage 
-                user={user}
-                userPreferences={userPreferences}
-                onSignOut={handleSignOut}
-              />
-            } 
-          />
-          
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+              } 
+            />
+            
+            {/* Auth Routes */}
+            <Route 
+              path="/signup" 
+              element={
+                !user ? (
+                  <AuthForm onAuth={handleAuth} loading={authLoading} isSignUp={true} />
+                ) : !userPreferences?.onboarding_completed ? (
+                  <Navigate to="/onboarding" replace />
+                ) : (
+                  <Navigate to="/feed" replace />
+                )
+              } 
+            />
+            <Route 
+              path="/login" 
+              element={
+                !user ? (
+                  <AuthForm onAuth={handleAuth} loading={authLoading} isSignUp={false} />
+                ) : !userPreferences?.onboarding_completed ? (
+                  <Navigate to="/onboarding" replace />
+                ) : (
+                  <Navigate to="/feed" replace />
+                )
+              } 
+            />
+            
+            {/* Protected Routes */}
+            <Route 
+              path="/onboarding" 
+              element={
+                user && !userPreferences?.onboarding_completed ? (
+                  <OnboardingFlow onComplete={handleOnboardingComplete} />
+                ) : user && userPreferences?.onboarding_completed ? (
+                  <Navigate to="/feed" replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+            
+            <Route 
+              path="/feed" 
+              element={
+                user && userPreferences?.onboarding_completed ? (
+                  <FeedScroller 
+                    userPreferences={userPreferences} 
+                    onSignOut={handleSignOut}
+                    user={user}
+                  />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+            
+            <Route 
+              path="/profile" 
+              element={
+                user && userPreferences?.onboarding_completed ? (
+                  <ProfilePage 
+                    user={user} 
+                    userPreferences={userPreferences}
+                    onSignOut={handleSignOut}
+                    onUpdatePreferences={setUserPreferences}
+                  />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              } 
+            />
+            
+            {/* Article Page - Public but enhanced for logged in users */}
+            <Route 
+              path="/article/:slug" 
+              element={
+                <ArticlePage 
+                  user={user}
+                  userPreferences={userPreferences}
+                  onSignOut={handleSignOut}
+                />
+              } 
+            />
+            
+            {/* Catch all route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Suspense>
 
         {error && (
           <motion.div
