@@ -37,9 +37,7 @@ const ArticleCounter = ({ className = '' }) => {
           }
         } catch (error) {
           console.log('Edge function not available, falling back to direct query');
-        }
-
-        // Fallback: Direct query to the database
+        }        // Fallback: Direct query to the database
         const { data, error } = await supabase
           .from('site_stats')
           .select('*')
@@ -47,12 +45,16 @@ const ArticleCounter = ({ className = '' }) => {
           .single();
 
         if (error) {
-          // If no stats record, count articles directly
+          console.log('Stats table error:', error.message);
+          // If no stats record or table doesn't exist, count articles directly
           const { count, error: countError } = await supabase
             .from('articles')
             .select('*', { count: 'exact', head: true });
 
-          if (countError) throw countError;
+          if (countError) {
+            console.error('Error counting articles:', countError.message);
+            throw countError;
+          }
 
           setStats({
             totalArticles: count || 0,
@@ -69,9 +71,30 @@ const ArticleCounter = ({ className = '' }) => {
             loading: false,
             error: null
           });
-        }
-      } catch (error) {
+        }      } catch (error) {
         console.error('Error fetching article stats:', error);
+        // Do one final fallback attempt if we can't get the stats
+        try {
+          // Last resort: Just get the article count
+          const { count } = await supabase
+            .from('articles')
+            .select('*', { count: 'exact', head: true });
+            
+          if (count !== null) {
+            setStats({
+              totalArticles: count,
+              lastUpdated: 'Just now',
+              lastFetchCount: 0,
+              loading: false,
+              error: null
+            });
+            return;
+          }
+        } catch (countError) {
+          console.error('Final fallback failed:', countError);
+        }
+        
+        // If all else fails, just hide the counter
         setStats(prev => ({
           ...prev,
           loading: false,
