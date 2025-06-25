@@ -92,7 +92,7 @@ const generateArticleHtml = (article) => {
   <meta property="og:url" content="${SITE_URL}/article/${article.slug}">
   <meta property="og:title" content="${escapedTitle}">
   <meta property="og:description" content="${escapedDescription}">
-  <meta property="og:image" content="${article.image_url || `${SITE_URL}/default-og-image.jpg`}">
+  <meta property="og:image" content="${getArticleImage(article) || `${SITE_URL}/default-og-image.jpg`}">
   <meta property="article:published_time" content="${publishDate}">
   <meta property="article:modified_time" content="${modifiedDate}">
   <meta property="article:section" content="${article.category}">
@@ -103,7 +103,7 @@ const generateArticleHtml = (article) => {
   <meta property="twitter:url" content="${SITE_URL}/article/${article.slug}">
   <meta property="twitter:title" content="${escapedTitle}">
   <meta property="twitter:description" content="${escapedDescription}">
-  <meta property="twitter:image" content="${article.image_url || `${SITE_URL}/default-og-image.jpg`}">
+  <meta property="twitter:image" content="${getArticleImage(article) || `${SITE_URL}/default-og-image.jpg`}">
   
   <!-- Canonical Link -->
   <link rel="canonical" href="${SITE_URL}/article/${article.slug}">
@@ -118,7 +118,7 @@ const generateArticleHtml = (article) => {
       "@context": "https://schema.org",
       "@type": "NewsArticle",
       "headline": "${escapedTitle}",
-      "image": ["${article.image_url || `${SITE_URL}/default-og-image.jpg`}"],
+      "image": ["${getArticleImage(article) || `${SITE_URL}/default-og-image.jpg`}"],
       "datePublished": "${publishDate}",
       "dateModified": "${modifiedDate}",
       "author": {
@@ -318,7 +318,7 @@ const generateArticleHtml = (article) => {
       ${article.rss_source ? `<span class="source">Source: <a href="${article.original_url || '#'}" target="_blank" rel="noopener noreferrer">${article.rss_source}</a></span>` : ''}
     </div>
     
-    ${article.image_url ? `<img src="${article.image_url}" alt="${escapedTitle}" loading="lazy">` : ''}
+    ${getArticleImage(article) ? `<img src="${getArticleImage(article)}" alt="${escapedTitle}" loading="lazy">` : ''}
       <div class="style-tabs">
       <div class="style-tab active" data-tab="normal">📰 Normal</div>
       ${genzContent ? `<div class="style-tab" data-tab="genz">✨ GenZ</div>` : ''}
@@ -611,4 +611,67 @@ async function generateStaticArticlePages(options = {}) {
     console.error('Error generating static article pages:', error);
     process.exit(1);
   }
+}
+
+// Function to get a default image based on category
+function getDefaultImage(category) {
+  const defaultImages = {
+    'Technology': [
+      'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/2004161/pexels-photo-2004161.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/3861969/pexels-photo-3861969.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'Gaming': [
+      'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1174746/pexels-photo-1174746.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'Entertainment': [
+      'https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/3709369/pexels-photo-3709369.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'Sports': [
+      'https://images.pexels.com/photos/1618200/pexels-photo-1618200.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/209977/pexels-photo-209977.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'Science': [
+      'https://images.pexels.com/photos/2004161/pexels-photo-2004161.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/256262/pexels-photo-256262.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'Business': [
+      'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/590022/pexels-photo-590022.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'Lifestyle': [
+      'https://images.pexels.com/photos/1181467/pexels-photo-1181467.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'Health': [
+      'https://images.pexels.com/photos/40568/medical-appointment-doctor-healthcare-40568.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/3683074/pexels-photo-3683074.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/3845810/pexels-photo-3845810.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'Politics': [
+      'https://images.pexels.com/photos/1550337/pexels-photo-1550337.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/6077326/pexels-photo-6077326.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1550340/pexels-photo-1550340.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ],
+    'World': [
+      'https://images.pexels.com/photos/87651/earth-blue-planet-globe-planet-87651.jpeg?auto=compress&cs=tinysrgb&w=800',
+      'https://images.pexels.com/photos/1550337/pexels-photo-1550337.jpeg?auto=compress&cs=tinysrgb&w=800'
+    ]
+  };
+  
+  const images = defaultImages[category] || defaultImages['Technology'];
+  return images[Math.floor(Math.random() * images.length)];
+}
+
+// Function to get the best image for an article
+function getArticleImage(article) {
+  if (article.image_url) {
+    return article.image_url;
+  }
+  return getDefaultImage(article.category);
 }

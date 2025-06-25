@@ -5,6 +5,7 @@ import { Helmet } from 'react-helmet-async';
 import { ArrowLeft, Clock, Tag, Rss, Share2, ExternalLink, User, Sun, Moon, LogOut, UserPlus, LogIn } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Article, getArticleBySlug, Comment } from '../lib/supabase';
+import { getArticleImage, getArticleImageAlt, handleImageError } from '../lib/imageUtils';
 import ToggleTabs from './ToggleTabs';
 import ReactionBar from './ReactionBar';
 import CommentBox from './CommentBox';
@@ -366,11 +367,9 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
                 </div>
                 <div className="ml-6 flex-shrink-0">
                   <img
-                    src={article.image_url || '/images/placeholder.svg'}
-                    alt={article.title}
-                    onError={(e) => {
-                      e.currentTarget.src = '/images/placeholder.svg';
-                    }}
+                    src={getArticleImage(article)}
+                    alt={getArticleImageAlt(article)}
+                    onError={(e) => handleImageError(e, article)}
                     className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-xl shadow-lg"
                   />
                 </div>

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { Article, getArticles } from '../lib/supabase';
+import { getArticleImage, getArticleImageAlt, handleImageError } from '../lib/imageUtils';
 import ToggleTabs from './ToggleTabs';
 import ArticleCounter from './ArticleCounter';
 
@@ -819,11 +820,9 @@ function PublicNewsCard({
           </div>
           <div className="ml-4 flex-shrink-0">
             <img
-              src={article.image_url || '/images/placeholder.svg'}
-              alt={article.title}
-              onError={(e) => {
-                e.currentTarget.src = '/images/placeholder.svg';
-              }}
+              src={getArticleImage(article)}
+              alt={getArticleImageAlt(article)}
+              onError={(e) => handleImageError(e, article)}
               className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl shadow-lg group-hover:scale-105 transition-transform duration-300"
             />
           </div>
