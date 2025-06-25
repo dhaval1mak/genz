@@ -6,7 +6,8 @@ import ReactionBar from './ReactionBar';
 import CommentBox from './CommentBox';
 import { Article, Comment } from '../lib/supabase';
 import { useTheme } from '../contexts/ThemeContext';
-import { Clock, Tag, Rss, ExternalLink } from 'lucide-react';
+import { Clock, Tag, Rss, ExternalLink, Share2 } from 'lucide-react';
+import { getArticleImage, getArticleImageAlt, handleImageError } from '../lib/imageUtils';
 
 type StyleType = 'normal' | 'genz' | 'alpha';
 
@@ -131,8 +132,9 @@ export default function NewsCard({
           {article.image_url && (
             <div className="ml-5 flex-shrink-0">
               <img
-                src={article.image_url}
-                alt={article.title}
+                src={getArticleImage(article)}
+                alt={getArticleImageAlt(article)}
+                onError={(e) => handleImageError(e, article)}
                 className="w-24 h-24 object-cover rounded-xl shadow-lg"
               />
             </div>

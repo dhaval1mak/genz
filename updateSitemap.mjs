@@ -15,6 +15,7 @@ if (!supabaseUrl || !supabaseKey) {
   console.error('Missing Supabase credentials in environment variables');
   process.exit(1);
 }
+console.log("H+++++++",supabaseUrl, supabaseAnonKey)
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
