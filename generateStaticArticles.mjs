@@ -386,26 +386,7 @@ function getRelatedTags(category) {
     'Politics': ['government', 'policy', 'election', 'political'],
     'Lifestyle': ['culture', 'trends', 'fashion', 'food', 'travel']
   };
-  
-  return categoryMap[category] || [category.toLowerCase(), 'trending'];
-}
-
-// Helper function to generate related tags based on category
-function getRelatedTags(category) {
-  const categoryMap = {
-    'Technology': ['tech', 'innovation', 'digital', 'software', 'hardware', 'AI'],
-    'Science': ['research', 'discovery', 'innovation', 'space', 'biology', 'chemistry', 'physics'],
-    'Business': ['finance', 'economy', 'startups', 'entrepreneurship', 'market'],
-    'Health': ['wellness', 'medicine', 'fitness', 'healthcare', 'medical'],
-    'Gaming': ['games', 'esports', 'videogames', 'entertainment', 'gaming industry'],
-    'Entertainment': ['media', 'movies', 'tv', 'celebrities', 'streaming'],
-    'Sports': ['athletics', 'competition', 'players', 'teams', 'league'],
-    'World': ['global', 'international', 'politics', 'events'],
-    'Politics': ['government', 'policy', 'election', 'political'],
-    'Lifestyle': ['culture', 'trends', 'fashion', 'food', 'travel']
-  };
-  
-  return categoryMap[category] || [category.toLowerCase(), 'trending'];
+    return categoryMap[category] || [category.toLowerCase(), 'trending'];
 }
 
 // Create slugs for articles that might not have them
