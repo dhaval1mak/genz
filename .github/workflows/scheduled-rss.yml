@@ -10,7 +10,7 @@ on:
 jobs:
   process_rss_feeds:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 25
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -29,13 +29,53 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NODE_OPTIONS: --max-old-space-size=4096
+      
+      - name: Print last 100 lines of log on failure
+        if: failure()
+        run: |
+          echo '--- Last 100 lines of workflow log ---'
+          tail -n 100 $GITHUB_WORKSPACE/../_temp/_runner_script_log.txt || true
+      
+      # Save state with an artifact
+      - name: Create state file
+        run: echo "RSS processing completed at $(date)" > rss_completed.txt
+      
+      - name: Upload state as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: workflow-state
+          path: rss_completed.txt
+          retention-days: 1
+  
+  update_sitemap:
+    needs: process_rss_feeds
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
           
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Download state artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: workflow-state
+      
       - name: Update sitemap
         run: node updateSitemap.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          
+          NODE_OPTIONS: --max-old-space-size=4096
+      
       - name: Commit and push if there are changes
         run: |
           git config --local user.email "action@github.com"
@@ -43,3 +83,9 @@ jobs:
           git add sitemap.xml
           git diff --quiet && git diff --staged --quiet || git commit -m "Update sitemap with new articles from RSS feeds"
           git push
+      
+      - name: Print last 100 lines of log on failure
+        if: failure()
+        run: |
+          echo '--- Last 100 lines of workflow log ---'
+          tail -n 100 $GITHUB_WORKSPACE/../_temp/_runner_script_log.txt || true
