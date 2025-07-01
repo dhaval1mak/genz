@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && node generateStaticArticles.mjs",
+    "build:full": "node build.mjs",
     "postbuild": "node updateSitemap.mjs && node checkRobotsTxt.mjs && node analyzeBundles.mjs",
     "analyze": "node analyzeBundles.mjs",
     "generate-static": "node generateStaticArticles.mjs",

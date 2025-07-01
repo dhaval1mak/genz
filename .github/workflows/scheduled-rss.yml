@@ -93,6 +93,9 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           NODE_OPTIONS: --max-old-space-size=4096
       
+      - name: Build project with all files
+        run: npm run build:full
+      
       - name: Commit and push if there are changes
         run: |
           git config --local user.email "action@github.com"
