@@ -37,14 +37,14 @@ jobs:
           echo '--- Last 100 lines of workflow log ---'
           tail -n 100 $GITHUB_WORKSPACE/../_temp/_runner_script_log.txt || true
       
-      # Save state with an artifact
+      # Save state with an artifact using latest v4 (July 2025)
       - name: Create state file
-        run: echo "RSS processing completed at $(date)" > rss_completed.txt
+        run: echo "RSS processing completed at $(date) - v4 artifact" > rss_completed.txt
       
       - name: Upload state as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: workflow-state
+          name: workflow-state-v4
           path: rss_completed.txt
           retention-days: 1
   
@@ -67,7 +67,7 @@ jobs:
       - name: Download state artifact
         uses: actions/download-artifact@v4
         with:
-          name: workflow-state
+          name: workflow-state-v4
       
       - name: Update sitemap
         run: node updateSitemap.mjs
