@@ -24,7 +24,7 @@ jobs:
         run: npm ci
         
       - name: Process RSS feeds
-        run: node processRSSFeeds.mjs
+        run: node processRSSFeeds-optimized.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
@@ -67,10 +67,27 @@ jobs:
       - name: Download state artifact
         uses: actions/download-artifact@v4
         with:
-          name: workflow-state-v4-v4
+          name: workflow-state-v4
+      
+      - name: Generate RSS feed
+        run: node generateRSSFeed.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          NODE_OPTIONS: --max-old-space-size=4096
       
       - name: Update sitemap
         run: node updateSitemap.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          NODE_OPTIONS: --max-old-space-size=4096
+      
+      - name: Copy sitemap to root
+        run: node copy_sitemap.mjs
+      
+      - name: Perform SEO indexing
+        run: node seoIndexing.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
@@ -80,8 +97,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add sitemap.xml
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update sitemap with new articles from RSS feeds"
+          git add sitemap.xml rss.xml sitemap-index.xml robots.txt public/rss.xml
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update sitemap, RSS feed, and SEO indexing"
           git push
       
       - name: Print last 100 lines of log on failure
