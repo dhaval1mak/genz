@@ -158,15 +158,12 @@ const additionalSeoEndpoints = [
 // Function to submit sitemap to search engines
 async function submitSitemapToSearchEngines() {
   console.log('🔍 Submitting sitemap to search engines...');
+  console.log('⚠️  Note: Google sitemap ping is deprecated (Jan 2024). Using alternative methods.');
   
   const sitemapUrl = `${SITE_URL}/sitemap.xml`;
   const results = [];
 
   const searchEngines = [
-    {
-      name: 'Google',
-      url: `https://www.google.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`
-    },
     {
       name: 'Bing',
       url: `https://www.bing.com/ping?sitemap=${encodeURIComponent(sitemapUrl)}`
@@ -220,12 +217,23 @@ async function submitSitemapToSearchEngines() {
     }
   }
 
+  // Add Google Search Console recommendation
+  results.push({
+    platform: 'Google Search Console',
+    success: true,
+    status: 'INFO',
+    message: 'Submit sitemap manually via Search Console (ping deprecated)'
+  });
+
+  console.log(`    ℹ️  Google: Submit sitemap manually via Search Console (ping deprecated)`);
+
   return results;
 }
 
 // Function to submit individual URLs to search engines
 async function submitUrlsToSearchEngines(urls, maxUrls = 10) {
   console.log(`🔗 Submitting ${Math.min(urls.length, maxUrls)} URLs to search engines...`);
+  console.log('⚠️  Note: Google ping deprecated. URLs will be discovered via sitemap and robots.txt.');
   
   const results = [];
   const urlsToSubmit = urls.slice(0, maxUrls);
@@ -234,20 +242,16 @@ async function submitUrlsToSearchEngines(urls, maxUrls = 10) {
     try {
       console.log(`  📡 Submitting: ${url.substring(0, 60)}...`);
       
-      // Submit to Google
-      const googleResponse = await fetch(`https://www.google.com/ping?sitemap=${encodeURIComponent(url)}`);
-      
-      // Submit to Bing
+      // Only submit to Bing (Google ping deprecated)
       const bingResponse = await fetch(`https://www.bing.com/ping?sitemap=${encodeURIComponent(url)}`);
       
       results.push({
         url,
-        google: googleResponse.ok,
         bing: bingResponse.ok,
-        success: googleResponse.ok || bingResponse.ok
+        success: bingResponse.ok
       });
 
-      console.log(`    ${results[results.length - 1].success ? '✅' : '⚠️'} Submitted`);
+      console.log(`    ${results[results.length - 1].success ? '✅' : '⚠️'} Submitted to Bing`);
       
       // Small delay between submissions
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -477,10 +481,11 @@ async function performSeoIndexing() {
   console.log('🚀 Starting comprehensive SEO indexing...');
   console.log(`🌐 Site URL: ${SITE_URL}`);
   console.log('⚠️  Note: Sitemap must be deployed to live site before search engines can access it');
+  console.log('📋 Google sitemap ping deprecated (Jan 2024). Use Search Console for manual submission.');
   const startTime = Date.now();
 
   try {
-    // 1. Submit sitemap to search engines
+    // 1. Submit sitemap to search engines (excluding deprecated Google ping)
     const sitemapResults = await submitSitemapToSearchEngines();
     
     // 2. Get recent articles and submit individual URLs
@@ -544,6 +549,7 @@ async function performSeoIndexing() {
     console.log('\n🎉 SEO indexing completed successfully!');
     console.log('💡 Your content should now be discoverable by search engines and social platforms.');
     console.log('🚀 After deployment, sitemap will be accessible at: https://slangpress.netlify.app/sitemap.xml');
+    console.log('📋 For Google: Submit sitemap manually via Google Search Console (ping deprecated)');
     
   } catch (error) {
     console.error('❌ SEO indexing failed:', error.message);
