@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
-    <url>
-      <loc>https://slangpress.netlify.app/</loc>
+  <url>
+    <loc>https://slangpress.netlify.app/</loc>
       <lastmod>2025-07-01</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1.0</priority>
-    </url>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
   
-    <url>
-      <loc>https://slangpress.netlify.app/profile</loc>
+  <url>
+    <loc>https://slangpress.netlify.app/profile</loc>
       <lastmod>2025-07-01</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.8</priority>
-    </url>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
   
-    <url>
-      <loc>https://slangpress.netlify.app/articles</loc>
+  <url>
+    <loc>https://slangpress.netlify.app/articles</loc>
       <lastmod>2025-07-01</lastmod>
       <changefreq>weekly</changefreq>
       <priority>0.8</priority>
@@ -39,10 +39,10 @@
   
     <url>
       <loc>https://slangpress.netlify.app/article/revolutionary-ai-breakthrough-changes-everything</loc>
-      <lastmod>2025-06-24</lastmod>
+    <lastmod>2025-06-24</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.7</priority>
-    </url>
+  </url>
   
     <url>
       <loc>https://slangpress.netlify.app/article/gaming-industry-sees-record-breaking-year</loc>
@@ -86,8 +86,8 @@
       <priority>0.7</priority>
     </url>
   
-    <url>
-      <loc>https://slangpress.netlify.app/article/breakthrough-in-quantum-computing-achieved</loc>
+  <url>
+    <loc>https://slangpress.netlify.app/article/breakthrough-in-quantum-computing-achieved</loc>
       <lastmod>2025-06-23</lastmod>
       <changefreq>monthly</changefreq>
       <priority>0.7</priority>
@@ -95,12 +95,12 @@
   
     <url>
       <loc>https://slangpress.netlify.app/article/google-introduces-ai-mode-to-users-in-india</loc>
-      <lastmod>2025-06-24</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.7</priority>
-    </url>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   
-    <url>
+  <url>
       <loc>https://slangpress.netlify.app/article/court-filings-reveal-openai-and-io-s-early-work-on-an-ai-dev</loc>
       <lastmod>2025-06-23</lastmod>
       <changefreq>monthly</changefreq>
@@ -116,31 +116,31 @@
   
     <url>
       <loc>https://slangpress.netlify.app/article/verizon-adopts-google-s-gemini-ai-to-help-customers-solve-co</loc>
-      <lastmod>2025-06-24</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.7</priority>
-    </url>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   
-    <url>
+  <url>
       <loc>https://slangpress.netlify.app/article/riot-is-shutting-down-studio-behind-its-minecraft-like-game</loc>
-      <lastmod>2025-06-24</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.7</priority>
-    </url>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   
-    <url>
+  <url>
       <loc>https://slangpress.netlify.app/article/windows-11-s-indicators-for-volume-and-brightness-can-soon-b</loc>
-      <lastmod>2025-06-24</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.7</priority>
-    </url>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   
-    <url>
+  <url>
       <loc>https://slangpress.netlify.app/article/ambitious-minecraft-competitor-hytale-canceled-after-nearly-</loc>
-      <lastmod>2025-06-24</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.7</priority>
-    </url>
+    <lastmod>2025-06-24</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
   
     <url>
       <loc>https://slangpress.netlify.app/article/dune-awakening-creative-director-lays-out-clear-plans-for-im</loc>

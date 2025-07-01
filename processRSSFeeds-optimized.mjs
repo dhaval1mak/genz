@@ -117,7 +117,7 @@ Return ONLY a JSON array like: [{"normal":"...", "genz":"...", "alpha":"..."}, .
       const jsonMatch = generatedText.match(/\[[\s\S]*\]/);
       if (jsonMatch) {
         try {
-          parsedContent = JSON.parse(jsonMatch[0]);
+        parsedContent = JSON.parse(jsonMatch[0]);
         } catch (extractError) {
           throw new Error(`Failed to extract JSON from response: ${extractError.message}`);
         }
@@ -236,7 +236,7 @@ async function processSingleFeed(feed) {
     
     const feedData = await parser.parseURL(feed.url);
     console.log(`  Found ${feedData.items.length} items`);
-    
+
     // Get top 2 items per feed for better coverage
     const items = feedData.items.slice(0, 2);
     
@@ -256,18 +256,18 @@ async function processSingleFeed(feed) {
       // Check for duplicates with better error handling
       try {
         const { data: existing, error: checkError } = await supabase
-          .from('articles')
-          .select('id')
-          .eq('original_url', link)
-          .limit(1);
+        .from('articles')
+        .select('id')
+        .eq('original_url', link)
+        .limit(1);
           
         if (checkError) {
           console.error(`  ❌ Error checking duplicates: ${checkError.message}`);
           continue;
         }
         
-        if (existing && existing.length > 0) {
-          console.log(`  ⏭️ Article exists: ${title.substring(0, 30)}...`);
+      if (existing && existing.length > 0) {
+        console.log(`  ⏭️ Article exists: ${title.substring(0, 30)}...`);
           continue;
         }
       } catch (checkError) {
@@ -389,14 +389,14 @@ async function processRSSFeeds() {
   // Update stats
   try {
     const { count: finalCount, error: countError } = await supabase
-      .from('articles')
-      .select('*', { count: 'exact', head: true });
-      
+    .from('articles')
+    .select('*', { count: 'exact', head: true });
+    
     if (countError) {
       console.error('❌ Error counting articles:', countError.message);
     } else if (finalCount !== null) {
-      console.log(`📊 Total articles in database: ${finalCount}`);
-      await updateSiteStats(finalCount, totalProcessed);
+    console.log(`📊 Total articles in database: ${finalCount}`);
+    await updateSiteStats(finalCount, totalProcessed);
     }
   } catch (error) {
     console.error('❌ Error getting final count:', error.message);
