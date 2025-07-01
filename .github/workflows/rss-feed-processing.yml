@@ -1,4 +1,4 @@
-name: Scheduled RSS Feed Processing (Updated)
+name: RSS Feed Processing (New)
 
 on:
   schedule:
@@ -67,7 +67,7 @@ jobs:
       - name: Download state artifact
         uses: actions/download-artifact@v4
         with:
-          name: workflow-state-v4-v4
+          name: workflow-state-v4
       
       - name: Update sitemap
         run: node updateSitemap.mjs
