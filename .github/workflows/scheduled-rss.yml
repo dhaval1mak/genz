@@ -1,4 +1,4 @@
-name: Scheduled RSS Feed Processing
+name: Scheduled RSS Feed Processing (Updated)
 
 on:
   schedule:
