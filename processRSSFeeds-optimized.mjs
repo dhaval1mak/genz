@@ -9,6 +9,7 @@ dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const geminiApiKey = process.env.GEMINI_API_KEY;
+const geminiApiKey2 = process.env.GEMINI_API_KEY_2; // Backup API key
 
 // Validate required environment variables
 if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
@@ -18,6 +19,14 @@ if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
   if (!geminiApiKey) console.error('  - GEMINI_API_KEY');
   console.error('\nPlease set these environment variables in your GitHub repository secrets or .env file.');
   process.exit(1);
+}
+
+// Log API key configuration
+console.log('🔑 API Configuration:');
+console.log(`  - Primary Gemini API: ${geminiApiKey ? '✅ SET' : '❌ NOT SET'}`);
+console.log(`  - Backup Gemini API: ${geminiApiKey2 ? '✅ SET' : '❌ NOT SET'}`);
+if (geminiApiKey2) {
+  console.log('💡 Backup API key available for redundancy');
 }
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -70,7 +79,7 @@ const rssFeeds = [
   { name: 'Vulture', url: 'https://www.vulture.com/rss/index.xml', category: 'Entertainment' },
 ];
 
-// Improved batch processing for Gemini API with better error handling
+// Improved batch processing for Gemini API with multiple API key fallback
 async function batchRewriteWithGemini(articles) {
   if (articles.length === 0) return [];
   
@@ -86,68 +95,93 @@ For each article, create exactly 3 versions:
 
 Return ONLY a JSON array like: [{"normal":"...", "genz":"...", "alpha":"..."}, ...]`;
 
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 4096,
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  // Try primary API key first, then backup if available
+  const apiKeys = [geminiApiKey, geminiApiKey2].filter(Boolean);
+  
+  for (let i = 0; i < apiKeys.length; i++) {
+    const currentApiKey = apiKeys[i];
+    const isBackup = i > 0;
     
-    if (!generatedText) throw new Error('No content generated from Gemini API');
-
-    // Try to parse JSON from response
-    let parsedContent;
     try {
-      parsedContent = JSON.parse(generatedText);
-    } catch (parseError) {
-      console.log('Failed to parse JSON directly, trying to extract JSON from response...');
-      const jsonMatch = generatedText.match(/\[[\s\S]*\]/);
-      if (jsonMatch) {
-        try {
-        parsedContent = JSON.parse(jsonMatch[0]);
-        } catch (extractError) {
-          throw new Error(`Failed to extract JSON from response: ${extractError.message}`);
-        }
-      } else {
-        throw new Error('No valid JSON found in response');
-      }
-    }
+      console.log(`🤖 ${isBackup ? 'Backup' : 'Primary'} Gemini API: Processing ${articles.length} articles...`);
+      
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${currentApiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 4096,
+          }
+        })
+      });
 
-    if (Array.isArray(parsedContent) && parsedContent.length === articles.length) {
-      return parsedContent;
+      if (!response.ok) {
+        const errorText = await response.text();
+        const errorMsg = `${isBackup ? 'Backup' : 'Primary'} Gemini API error: ${response.status} - ${errorText}`;
+        
+        // Check if this is a quota error and we have a backup
+        if ((response.status === 429 || response.status === 403) && !isBackup && geminiApiKey2) {
+          console.log(`⚠️ ${errorMsg}`);
+          console.log('🔄 Switching to backup Gemini API key...');
+          continue; // Try backup API
+        }
+        
+        throw new Error(errorMsg);
+      }
+
+      const data = await response.json();
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (!generatedText) throw new Error('No content generated from Gemini API');
+
+      // Try to parse JSON from response
+      let parsedContent;
+      try {
+        parsedContent = JSON.parse(generatedText);
+      } catch (parseError) {
+        console.log('Failed to parse JSON directly, trying to extract JSON from response...');
+        const jsonMatch = generatedText.match(/\[[\s\S]*\]/);
+        if (jsonMatch) {
+          try {
+            parsedContent = JSON.parse(jsonMatch[0]);
+          } catch (extractError) {
+            throw new Error(`Failed to extract JSON from response: ${extractError.message}`);
+          }
+        } else {
+          throw new Error('No valid JSON found in response');
+        }
+      }
+
+      if (Array.isArray(parsedContent) && parsedContent.length === articles.length) {
+        console.log(`✅ ${isBackup ? 'Backup' : 'Primary'} Gemini API succeeded!`);
+        return parsedContent;
+      }
+      
+      throw new Error(`Invalid response format: expected ${articles.length} items, got ${parsedContent?.length || 0}`);
+      
+    } catch (error) {
+      console.error(`❌ ${isBackup ? 'Backup' : 'Primary'} Gemini API failed:`, error.message);
+      
+      // If this is the last API key or we don't have backup, use fallback
+      if (isBackup || !geminiApiKey2) {
+        console.log('🔄 All Gemini APIs failed, using fallback content generation...');
+        return articles.map(article => {
+          const shortContent = article.content.substring(0, 200);
+          return {
+            normal: `${article.title}\n\n${shortContent}... [Read more at source]`,
+            genz: `OMG! 😱 ${article.title} just dropped! ✨ ${shortContent.substring(0, 120)}... This hits different! 💅 #Breaking`,
+            alpha: `BREAKING: ${article.title} 🔥 ${shortContent.substring(0, 100)}... Major W! 💪 #NewsW`
+          };
+        });
+      }
+      
+      // Continue to try backup API
+      continue;
     }
-    
-    throw new Error(`Invalid response format: expected ${articles.length} items, got ${parsedContent?.length || 0}`);
-    
-  } catch (error) {
-    console.error('❌ Batch Gemini processing failed:', error.message);
-    
-    // Fallback: return simple rewrites for all articles
-    console.log('🔄 Using fallback content generation...');
-    return articles.map(article => {
-      const shortContent = article.content.substring(0, 200);
-      return {
-        normal: `${article.title}\n\n${shortContent}... [Read more at source]`,
-        genz: `OMG! 😱 ${article.title} just dropped! ✨ ${shortContent.substring(0, 120)}... This hits different! 💅 #Breaking`,
-        alpha: `BREAKING: ${article.title} 🔥 ${shortContent.substring(0, 100)}... Major W! 💪 #NewsW`
-      };
-    });
   }
 }
 
