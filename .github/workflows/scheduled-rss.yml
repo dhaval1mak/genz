@@ -1,9 +1,9 @@
-name: Scheduled RSS Feed Processing (Updated)
+name: Scheduled RSS Feed Processing (Updated) - DISABLED
 
 on:
-  schedule:
-    # Run every 4 hours
-    - cron: '0 */4 * * *'
+  # schedule:
+  #   # Run every 4 hours
+  #   - cron: '0 */4 * * *'
   workflow_dispatch:
     # Allow manual triggering
 
