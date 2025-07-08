@@ -1,4 +1,4 @@
-name: RSS Feed Processing (Test Mode)
+name: RSS Feed Processing (Full)
 
 on:
   schedule:
@@ -8,10 +8,10 @@ on:
     # Allow manual triggering
 
 jobs:
-  test_rss_processing:
+  process_rss_feeds:
     runs-on: ubuntu-latest
     environment: secrets
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -24,13 +24,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Run minimal RSS test
-        run: node test_rss_minimal.mjs
+      - name: Process RSS feeds
+        run: node processRSSFeeds-optimized.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          NODE_OPTIONS: --max-old-space-size=2048
           
       - name: Print detailed logs on failure
         if: failure()
@@ -45,25 +44,20 @@ jobs:
           echo '--- Last 100 lines of workflow log ---'
           tail -n 100 $GITHUB_WORKSPACE/../_temp/_runner_script_log.txt || echo "Log file not found"
       
-      - name: Create success indicator
-        if: success()
-        run: echo "Minimal RSS test completed successfully at $(date)" > test_success.txt
+      - name: Create state file
+        run: echo "RSS processing completed at $(date)" > rss_completed.txt
       
-      - name: Upload test results
-        if: always()
+      - name: Upload state as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: |
-            test_success.txt
-            *.log
+          name: rss-processing-state
+          path: rss_completed.txt
           retention-days: 1
   
-  # Only run sitemap update if test passes
   update_sitemap:
-    needs: test_rss_processing
+    needs: process_rss_feeds
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -76,24 +70,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: Download test results
+      - name: Download state artifact
         uses: actions/download-artifact@v4
         with:
-          name: test-results
+          name: rss-processing-state
       
-      - name: Update sitemap (simple version)
+      - name: Update sitemap
         run: node updateSitemap.mjs
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          NODE_OPTIONS: --max-old-space-size=2048
       
       - name: Commit and push if there are changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add sitemap.xml
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update sitemap from minimal RSS test"
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update sitemap with new articles from RSS feeds"
           git push
       
       - name: Print logs on failure

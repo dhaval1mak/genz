@@ -46,12 +46,15 @@ const rssFeeds = [
   { name: 'BBC Business', url: 'https://feeds.bbci.co.uk/news/business/rss.xml', category: 'Business' },
   { name: 'MarketWatch', url: 'https://www.marketwatch.com/rss/topstories', category: 'Business' },
 
-  // General News (most reliable sources)
-  { name: 'AP News', url: 'https://apnews.com/index.rss', category: 'World' },
-  { name: 'NBC News', url: 'https://feeds.nbcnews.com/nbcnews/public/rss/topstories.xml', category: 'World' },
-  { name: 'Reuters', url: 'https://www.reutersagency.com/feed/?best-topics=top-news', category: 'World' },
+  // World News (most reliable sources)
+  { name: 'BBC News', url: 'https://feeds.bbci.co.uk/news/rss.xml', category: 'World' },
   { name: 'NPR', url: 'https://www.npr.org/rss/rss.php?id=1001', category: 'World' },
   { name: 'The Guardian', url: 'https://www.theguardian.com/world/rss', category: 'World' },
+  { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', category: 'World' },
+  { name: 'Deutsche Welle', url: 'https://rss.dw.com/rdf/rss-en-all', category: 'World' },
+  { name: 'CNN World', url: 'http://rss.cnn.com/rss/cnn_world.rss', category: 'World' },
+  { name: 'ABC News', url: 'https://abcnews.go.com/abcnews/topstories', category: 'World' },
+  { name: 'CBS News', url: 'https://www.cbsnews.com/latest/rss/main', category: 'World' },
 
   // Sports
   { name: 'ESPN', url: 'https://www.espn.com/espn/rss/news', category: 'Sports' },
