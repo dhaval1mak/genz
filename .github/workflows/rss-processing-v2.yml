@@ -1,0 +1,108 @@
+name: RSS Processing System
+
+on:
+  schedule:
+    # Run every 4 hours
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  rss_processing:
+    name: Process RSS Feeds
+    runs-on: ubuntu-latest
+    environment: secrets
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Process RSS feeds (Full)
+        run: node processRSSFeeds-optimized.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          
+      - name: Create processing state
+        run: echo "RSS processing completed at $(date)" > rss_completed.txt
+      
+      - name: Upload processing artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rss-processing-complete
+          path: rss_completed.txt
+          retention-days: 1
+          
+      - name: Debug on failure
+        if: failure()
+        run: |
+          echo '--- RSS PROCESSING FAILURE DEBUG ---'
+          echo 'Working directory:' && pwd
+          echo 'Environment check:'
+          echo "SUPABASE_URL: ${{ secrets.SUPABASE_URL != '' && '✅ SET' || '❌ NOT SET' }}"
+          echo "SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY != '' && '✅ SET' || '❌ NOT SET' }}"
+          echo "GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY != '' && '✅ SET' || '❌ NOT SET' }}"
+
+  sitemap_update:
+    name: Update Sitemap
+    needs: rss_processing
+    runs-on: ubuntu-latest
+    environment: secrets
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Download processing artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rss-processing-complete
+      
+      - name: Update sitemap
+        run: node updateSitemap.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      
+      - name: Commit sitemap changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action RSS Bot"
+          git add sitemap.xml
+          if git diff --staged --quiet; then
+            echo "No sitemap changes to commit"
+          else
+            git commit -m "🗺️ Update sitemap with new RSS articles"
+            git push
+            echo "Sitemap updated and pushed successfully"
+          fi
+          
+      - name: Debug sitemap failure
+        if: failure()
+        run: |
+          echo '--- SITEMAP UPDATE FAILURE DEBUG ---'
+          echo 'Working directory:' && pwd
+          echo 'Git status:' && git status
+          echo 'Environment check:'
+          echo "SUPABASE_URL: ${{ secrets.SUPABASE_URL != '' && '✅ SET' || '❌ NOT SET' }}"
+          echo "SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY != '' && '✅ SET' || '❌ NOT SET' }}"
+          echo 'Recent commits:' && git log --oneline -3 
