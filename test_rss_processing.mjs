@@ -4,10 +4,14 @@ import { createClient } from '@supabase/supabase-js';
 // Load environment variables
 dotenv.config();
 
-// Test environment variables
+// Environment variables
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const geminiApiKey = process.env.GEMINI_API_KEY;
+const geminiApiKey2 = process.env.GEMINI_API_KEY_2;
+const geminiApiKey3 = process.env.GEMINI_API_KEY_3;
+const geminiApiKey4 = process.env.GEMINI_API_KEY_4;
+const geminiApiKey5 = process.env.GEMINI_API_KEY_5;
 
 console.log('🧪 Testing RSS Processing Setup...\n');
 
@@ -24,6 +28,59 @@ if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
   if (!supabaseServiceKey) console.error('  - SUPABASE_SERVICE_KEY');
   if (!geminiApiKey) console.error('  - GEMINI_API_KEY');
   process.exit(1);
+}
+
+// Test environment variables
+async function testEnvironmentVariables() {
+  console.log('🔍 Testing environment variables...');
+  
+  const required = [
+    { name: 'SUPABASE_URL', value: supabaseUrl },
+    { name: 'SUPABASE_SERVICE_KEY', value: supabaseServiceKey },
+    { name: 'GEMINI_API_KEY', value: geminiApiKey }
+  ];
+  
+  const optional = [
+    { name: 'GEMINI_API_KEY_2', value: geminiApiKey2 },
+    { name: 'GEMINI_API_KEY_3', value: geminiApiKey3 },
+    { name: 'GEMINI_API_KEY_4', value: geminiApiKey4 },
+    { name: 'GEMINI_API_KEY_5', value: geminiApiKey5 }
+  ];
+  
+  let allGood = true;
+  
+  // Check required variables
+  for (const { name, value } of required) {
+    if (value) {
+      console.log(`✅ ${name}: SET`);
+    } else {
+      console.log(`❌ ${name}: NOT SET`);
+      allGood = false;
+    }
+  }
+  
+  // Check optional backup API keys
+  console.log('\n🔑 Backup API Keys:');
+  const availableBackups = [];
+  for (const { name, value } of optional) {
+    if (value) {
+      console.log(`✅ ${name}: SET`);
+      availableBackups.push(name);
+    } else {
+      console.log(`❌ ${name}: NOT SET`);
+    }
+  }
+  
+  const totalApiKeys = [geminiApiKey, geminiApiKey2, geminiApiKey3, geminiApiKey4, geminiApiKey5].filter(Boolean).length;
+  console.log(`💡 Total available API keys: ${totalApiKeys}/5`);
+  
+  if (totalApiKeys >= 2) {
+    console.log('✅ Multiple API keys available for redundancy');
+  } else if (totalApiKeys === 1) {
+    console.log('⚠️ Only primary API key available (consider adding backups)');
+  }
+  
+  return allGood;
 }
 
 // Test Supabase connection
@@ -53,44 +110,56 @@ async function testSupabaseConnection() {
   }
 }
 
-// Test Gemini API
+// Test Gemini API with fallback system
 async function testGeminiAPI() {
-  console.log('\n🤖 Testing Gemini API...');
+  console.log('\n🤖 Testing Gemini API with fallback system...');
   
-  try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: 'Hello, this is a test message.' }] }],
-        generationConfig: {
-          maxOutputTokens: 100,
-        }
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`❌ Gemini API test failed: ${response.status} - ${errorText}`);
-      return false;
-    }
-
-    const data = await response.json();
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  const apiKeys = [geminiApiKey, geminiApiKey2, geminiApiKey3, geminiApiKey4, geminiApiKey5].filter(Boolean);
+  
+  for (let i = 0; i < apiKeys.length; i++) {
+    const currentApiKey = apiKeys[i];
+    const keyLabel = i === 0 ? 'Primary' : `Backup ${i}`;
     
-    if (generatedText) {
-      console.log(`✅ Gemini API test successful!`);
-      console.log(`📝 Sample response: ${generatedText.substring(0, 50)}...`);
-      return true;
-    } else {
-      console.error(`❌ Gemini API returned no content`);
-      return false;
+    try {
+      console.log(`🔍 Testing ${keyLabel} Gemini API...`);
+      
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${currentApiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'Hello, this is a test message.' }] }],
+          generationConfig: {
+            maxOutputTokens: 100,
+          }
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`❌ ${keyLabel} Gemini API test failed: ${response.status} - ${errorText}`);
+        
+        // Continue to test next API key
+        continue;
+      }
+
+      const data = await response.json();
+      const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      
+      if (generatedText) {
+        console.log(`✅ ${keyLabel} Gemini API test successful!`);
+        console.log(`📝 Sample response: ${generatedText.substring(0, 50)}...`);
+        return true;
+      } else {
+        console.error(`❌ ${keyLabel} Gemini API returned no content`);
+      }
+      
+    } catch (error) {
+      console.error(`❌ ${keyLabel} Gemini API test error: ${error.message}`);
     }
-    
-  } catch (error) {
-    console.error(`❌ Gemini API test error: ${error.message}`);
-    return false;
   }
+  
+  console.error('❌ All Gemini API keys failed');
+  return false;
 }
 
 // Test RSS parser
@@ -128,6 +197,7 @@ async function runTests() {
   console.log('🚀 Starting comprehensive RSS processing tests...\n');
   
   const tests = [
+    { name: 'Environment Variables', fn: testEnvironmentVariables },
     { name: 'Supabase Connection', fn: testSupabaseConnection },
     { name: 'Gemini API', fn: testGeminiAPI },
     { name: 'RSS Parser', fn: testRSSParser }

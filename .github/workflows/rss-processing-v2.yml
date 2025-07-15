@@ -33,6 +33,9 @@ jobs:
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
+          GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
+          GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
+          GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
           
       - name: Create processing state
         run: echo "RSS processing completed at $(date)" > rss_completed.txt
@@ -54,6 +57,9 @@ jobs:
           echo "SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY != '' && '✅ SET' || '❌ NOT SET' }}"
           echo "GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY != '' && '✅ SET' || '❌ NOT SET' }}"
           echo "GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 != '' && '✅ SET' || '❌ NOT SET' }}"
+          echo "GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 != '' && '✅ SET' || '❌ NOT SET' }}"
+          echo "GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 != '' && '✅ SET' || '❌ NOT SET' }}"
+          echo "GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 != '' && '✅ SET' || '❌ NOT SET' }}"
 
   sitemap_update:
     name: Update Sitemap

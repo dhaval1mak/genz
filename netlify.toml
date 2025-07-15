@@ -38,3 +38,6 @@
   from = "/rss"
   to = "/rss.xml"
   status = 301 
+
+[[plugins]]
+package = "@netlify/plugin-sitemap" 

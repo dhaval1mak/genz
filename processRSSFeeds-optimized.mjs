@@ -9,7 +9,10 @@ dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const geminiApiKey = process.env.GEMINI_API_KEY;
-const geminiApiKey2 = process.env.GEMINI_API_KEY_2; // Backup API key
+const geminiApiKey2 = process.env.GEMINI_API_KEY_2;
+const geminiApiKey3 = process.env.GEMINI_API_KEY_3;
+const geminiApiKey4 = process.env.GEMINI_API_KEY_4;
+const geminiApiKey5 = process.env.GEMINI_API_KEY_5;
 
 // Validate required environment variables
 if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
@@ -24,10 +27,13 @@ if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
 // Log API key configuration
 console.log('🔑 API Configuration:');
 console.log(`  - Primary Gemini API: ${geminiApiKey ? '✅ SET' : '❌ NOT SET'}`);
-console.log(`  - Backup Gemini API: ${geminiApiKey2 ? '✅ SET' : '❌ NOT SET'}`);
-if (geminiApiKey2) {
-  console.log('💡 Backup API key available for redundancy');
-}
+console.log(`  - Backup API Key 2: ${geminiApiKey2 ? '✅ SET' : '❌ NOT SET'}`);
+console.log(`  - Backup API Key 3: ${geminiApiKey3 ? '✅ SET' : '❌ NOT SET'}`);
+console.log(`  - Backup API Key 4: ${geminiApiKey4 ? '✅ SET' : '❌ NOT SET'}`);
+console.log(`  - Backup API Key 5: ${geminiApiKey5 ? '✅ SET' : '❌ NOT SET'}`);
+
+const availableApiKeys = [geminiApiKey, geminiApiKey2, geminiApiKey3, geminiApiKey4, geminiApiKey5].filter(Boolean);
+console.log(`💡 Total available API keys: ${availableApiKeys.length}/5`);
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const parser = new Parser({
@@ -79,7 +85,7 @@ const rssFeeds = [
   { name: 'Vulture', url: 'https://www.vulture.com/rss/index.xml', category: 'Entertainment' },
 ];
 
-// Improved batch processing for Gemini API with multiple API key fallback
+// Enhanced batch processing for Gemini API with 5-key fallback system
 async function batchRewriteWithGemini(articles) {
   if (articles.length === 0) return [];
   
@@ -95,15 +101,15 @@ For each article, create exactly 3 versions:
 
 Return ONLY a JSON array like: [{"normal":"...", "genz":"...", "alpha":"..."}, ...]`;
 
-  // Try primary API key first, then backup if available
-  const apiKeys = [geminiApiKey, geminiApiKey2].filter(Boolean);
+  // Use all available API keys with robust fallback
+  const apiKeys = [geminiApiKey, geminiApiKey2, geminiApiKey3, geminiApiKey4, geminiApiKey5].filter(Boolean);
   
   for (let i = 0; i < apiKeys.length; i++) {
     const currentApiKey = apiKeys[i];
-    const isBackup = i > 0;
+    const keyLabel = i === 0 ? 'Primary' : `Backup ${i}`;
     
     try {
-      console.log(`🤖 ${isBackup ? 'Backup' : 'Primary'} Gemini API: Processing ${articles.length} articles...`);
+      console.log(`🤖 ${keyLabel} Gemini API: Processing ${articles.length} articles...`);
       
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${currentApiKey}`, {
         method: 'POST',
@@ -121,13 +127,13 @@ Return ONLY a JSON array like: [{"normal":"...", "genz":"...", "alpha":"..."}, .
 
       if (!response.ok) {
         const errorText = await response.text();
-        const errorMsg = `${isBackup ? 'Backup' : 'Primary'} Gemini API error: ${response.status} - ${errorText}`;
+        const errorMsg = `${keyLabel} Gemini API error: ${response.status} - ${errorText}`;
         
-        // Check if this is a quota error and we have a backup
-        if ((response.status === 429 || response.status === 403) && !isBackup && geminiApiKey2) {
+        // Check if this is a quota/rate limit error and we have more backup keys
+        if ((response.status === 429 || response.status === 403) && i < apiKeys.length - 1) {
           console.log(`⚠️ ${errorMsg}`);
-          console.log('🔄 Switching to backup Gemini API key...');
-          continue; // Try backup API
+          console.log(`🔄 Switching to ${i === 0 ? 'Backup 2' : `Backup ${i + 1}`} Gemini API key...`);
+          continue; // Try next API key
         }
         
         throw new Error(errorMsg);
@@ -157,18 +163,18 @@ Return ONLY a JSON array like: [{"normal":"...", "genz":"...", "alpha":"..."}, .
       }
 
       if (Array.isArray(parsedContent) && parsedContent.length === articles.length) {
-        console.log(`✅ ${isBackup ? 'Backup' : 'Primary'} Gemini API succeeded!`);
+        console.log(`✅ ${keyLabel} Gemini API succeeded!`);
         return parsedContent;
       }
       
       throw new Error(`Invalid response format: expected ${articles.length} items, got ${parsedContent?.length || 0}`);
       
     } catch (error) {
-      console.error(`❌ ${isBackup ? 'Backup' : 'Primary'} Gemini API failed:`, error.message);
+      console.error(`❌ ${keyLabel} Gemini API failed:`, error.message);
       
-      // If this is the last API key or we don't have backup, use fallback
-      if (isBackup || !geminiApiKey2) {
-        console.log('🔄 All Gemini APIs failed, using fallback content generation...');
+      // If this is the last API key, use fallback content
+      if (i === apiKeys.length - 1) {
+        console.log('🔄 All Gemini APIs exhausted, using fallback content generation...');
         return articles.map(article => {
           const shortContent = article.content.substring(0, 200);
           return {
@@ -179,7 +185,7 @@ Return ONLY a JSON array like: [{"normal":"...", "genz":"...", "alpha":"..."}, .
         });
       }
       
-      // Continue to try backup API
+      // Continue to try next API key
       continue;
     }
   }

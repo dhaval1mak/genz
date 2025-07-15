@@ -12,11 +12,27 @@ console.log('📅 Time:', new Date().toISOString());
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const geminiApiKey = process.env.GEMINI_API_KEY;
+const geminiApiKey2 = process.env.GEMINI_API_KEY_2;
+const geminiApiKey3 = process.env.GEMINI_API_KEY_3;
+const geminiApiKey4 = process.env.GEMINI_API_KEY_4;
+const geminiApiKey5 = process.env.GEMINI_API_KEY_5;
 
 console.log('🔐 Environment Check:');
 console.log('  - Supabase URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
 console.log('  - Supabase Service Key:', supabaseServiceKey ? '✅ Set' : '❌ Missing');
-console.log('  - Gemini API Key:', geminiApiKey ? '✅ Set' : '❌ Missing');
+console.log('  - Primary Gemini API Key:', geminiApiKey ? '✅ Set' : '❌ Missing');
+
+// Check all backup API keys
+const backupKeys = [geminiApiKey2, geminiApiKey3, geminiApiKey4, geminiApiKey5];
+const backupLabels = ['Backup 2', 'Backup 3', 'Backup 4', 'Backup 5'];
+
+console.log('\n🔑 Backup API Keys:');
+backupKeys.forEach((key, index) => {
+  console.log(`  - ${backupLabels[index]}: ${key ? '✅ Set' : '❌ Missing'}`);
+});
+
+const totalApiKeys = [geminiApiKey, geminiApiKey2, geminiApiKey3, geminiApiKey4, geminiApiKey5].filter(Boolean).length;
+console.log(`\n💡 Total available API keys: ${totalApiKeys}/5`);
 
 // Validate required environment variables
 if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
@@ -50,41 +66,53 @@ function generateSimpleContent(title, content) {
   };
 }
 
-// Test Gemini API with minimal request
+// Test Gemini API with fallback system
 async function testGeminiAPI(article) {
-  console.log('🤖 Testing Gemini API...');
+  console.log('🤖 Testing Gemini API with fallback system...');
   
-  try {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + geminiApiKey, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `Rewrite this news title in a simple way: "${article.title}"`
-          }]
-        }],
-        generationConfig: {
-          maxOutputTokens: 100,
-          temperature: 0.3,
-        }
-      })
-    });
+  const apiKeys = [geminiApiKey, geminiApiKey2, geminiApiKey3, geminiApiKey4, geminiApiKey5].filter(Boolean);
+  
+  for (let i = 0; i < apiKeys.length; i++) {
+    const currentApiKey = apiKeys[i];
+    const keyLabel = i === 0 ? 'Primary' : `Backup ${i}`;
     
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+    try {
+      console.log(`🔍 Testing ${keyLabel} Gemini API...`);
+      
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + currentApiKey, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `Rewrite this news title in a simple way: "${article.title}"`
+            }]
+          }],
+          generationConfig: {
+            maxOutputTokens: 100,
+            temperature: 0.3,
+          }
+        })
+      });
+      
+      if (!response.ok) {
+        console.error(`❌ ${keyLabel} Gemini API test failed: ${response.status}`);
+        continue; // Try next API key
+      }
+      
+      const data = await response.json();
+      console.log(`✅ ${keyLabel} Gemini API test successful`);
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Test successful';
+      
+    } catch (error) {
+      console.error(`❌ ${keyLabel} Gemini API test error: ${error.message}`);
     }
-    
-    const data = await response.json();
-    console.log('✅ Gemini API test successful');
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Test successful';
-    
-  } catch (error) {
-    console.error('❌ Gemini API test failed:', error.message);
-    return null;
   }
+  
+  console.error('❌ All Gemini API keys failed');
+  return null;
 }
 
 function generateSlug(title, category) {
