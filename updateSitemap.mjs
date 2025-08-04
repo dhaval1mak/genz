@@ -71,8 +71,6 @@ async function pingSearchEngines(sitemapUrl) {
 
 async function updateSitemap() {
   try {
-    console.log('Generating sitemap.xml...');
-    
     // Define static routes
     const staticRoutes = [
       '/',
@@ -81,31 +79,48 @@ async function updateSitemap() {
       '/signup',
       '/login'
     ];
+
+    // Fetch ALL articles from Supabase using pagination
+    let allArticles = [];
+    let from = 0;
+    const batchSize = 1000;
     
-    // Fetch all articles from Supabase
-    const { data: articles, error } = await supabase
-      .from('articles')
-      .select('slug, published_at, created_at, title, category');
-    
-    if (error) {
-      throw new Error(`Error fetching articles: ${error.message}`);
+    while (true) {
+      const { data: articles, error } = await supabase
+        .from('articles')
+        .select('slug, published_at, created_at, title, category')
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        throw new Error(`Error fetching articles: ${error.message}`);
+      }
+
+      if (!articles || articles.length === 0) {
+        break;
+      }
+
+      allArticles = allArticles.concat(articles);
+      from += batchSize;
+      
+      // Break if we got less than the batch size (last batch)
+      if (articles.length < batchSize) {
+        break;
+      }
     }
-    
-    console.log(`Found ${articles.length} articles for sitemap`);
-    
+
+    const articles = allArticles;
+
     // Generate the sitemap XML
     const sitemapXml = generateSitemapXml(staticRoutes, articles);
-    
+
     // Ensure the dist directory exists
     const distDir = path.dirname(SITEMAP_PATH);
     if (!fs.existsSync(distDir)) {
       fs.mkdirSync(distDir, { recursive: true });
     }
-    
+
     // Write the sitemap to file
     fs.writeFileSync(SITEMAP_PATH, sitemapXml);
-    
-    console.log(`Sitemap generated successfully at ${SITEMAP_PATH}`);
 
     // Ping search engines
     await pingSearchEngines(`${BASE_URL}/sitemap.xml`);

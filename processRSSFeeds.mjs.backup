@@ -8,7 +8,7 @@ dotenv.config();
 // Environment variables - use environment variables or fallback to hardcoded for backwards compatibility
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://fdnvfdkhhwdpkyomsvoq.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZkbnZmZGtoaHdkcGt5b21zdm9xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0ODE5NzM1MywiZXhwIjoyMDYzNzczMzUzfQ.dvbEOUkfEG-hucg4N-pBvCVO7DgGvpa6Hg3OE7YUajc';
-const geminiApiKey = process.env.GEMINI_API_KEY || 'AIzaSyD-Zsfm8b7KE0GGFEA2hxQoswtHhCth1t8';
+const geminiApiKey = process.env.GEMINI_API_KEY;
 
 // Validate required environment variables
 if (!supabaseUrl || !supabaseServiceKey || !geminiApiKey) {
