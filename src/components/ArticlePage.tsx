@@ -6,6 +6,7 @@ import { ArrowLeft, Clock, Tag, Rss, Share2, ExternalLink, User, Sun, Moon, LogO
 import { useTheme } from '../contexts/ThemeContext';
 import { Article, getArticleBySlug, Comment } from '../lib/supabase';
 import { getArticleImage, getArticleImageAlt, handleImageError } from '../lib/imageUtils';
+import Breadcrumbs from './Breadcrumbs';
 import ToggleTabs from './ToggleTabs';
 import ReactionBar from './ReactionBar';
 import CommentBox from './CommentBox';
@@ -245,6 +246,11 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
       </Helmet>
 
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900">
+        {/* Breadcrumbs */}
+        <div className="max-w-4xl mx-auto px-4 pt-4">
+          <Breadcrumbs />
+        </div>
+        
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-800/50">
           <div className="max-w-4xl mx-auto px-4 py-4">

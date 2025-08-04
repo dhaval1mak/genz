@@ -4,9 +4,13 @@ import { useInView } from 'react-intersection-observer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import NewsCard from './NewsCard';
+import Breadcrumbs from './Breadcrumbs';
+import TrendingTopics from './TrendingTopics';
+import HomepageSchema from './HomepageSchema';
 import { Comment } from '../lib/supabase';
 import { useNewsData } from '../hooks/useNewsData';
 import { useTheme } from '../contexts/ThemeContext';
+import TrendingTopicsService from '../lib/trendingTopics';
 import { Loader2, Zap, TrendingUp, LogOut, User, Sun, Moon, Filter, RefreshCw, Clock } from 'lucide-react';
 
 type StyleType = 'normal' | 'genz' | 'alpha';
@@ -25,6 +29,7 @@ export default function FeedScroller({ userPreferences, onSignOut, user }: FeedS
   const [filter, setFilter] = useState<'all' | 'trending' | 'latest'>('all');
   const [showSettings, setShowSettings] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [trendingTopics, setTrendingTopics] = useState<string[]>([]);
   const { theme, toggleTheme } = useTheme();
 
   const { articles, loading, hasMore, loadMore, refreshArticles } = useNewsData(
@@ -51,6 +56,20 @@ export default function FeedScroller({ userPreferences, onSignOut, user }: FeedS
     }, 30 * 60 * 1000); // 30 minutes
 
     return () => clearInterval(interval);
+  }, []);
+
+  // Load trending topics
+  useEffect(() => {
+    const loadTrendingTopics = async () => {
+      try {
+        const trends = await TrendingTopicsService.getCachedTrendingTopics();
+        setTrendingTopics(trends);
+      } catch (error) {
+        console.error('Failed to load trending topics:', error);
+      }
+    };
+    
+    loadTrendingTopics();
   }, []);
 
   const handleLike = async (articleId: string, style: StyleType) => {
@@ -155,7 +174,15 @@ export default function FeedScroller({ userPreferences, onSignOut, user }: FeedS
         </script>
       </Helmet>
 
+      {/* SEO Components */}
+      <HomepageSchema latestArticles={articles.slice(0, 10)} />
+      
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 dark:from-gray-900 dark:via-purple-900/20 dark:to-gray-900 transition-colors duration-300">
+        {/* Breadcrumbs */}
+        <div className="max-w-4xl mx-auto px-4 pt-4">
+          <Breadcrumbs />
+        </div>
+        
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-800/50 transition-colors duration-300">
           <div className="max-w-4xl mx-auto px-4 py-4">
@@ -270,6 +297,11 @@ export default function FeedScroller({ userPreferences, onSignOut, user }: FeedS
 
         {/* Feed */}
         <div className="max-w-4xl mx-auto px-4 py-10">
+          {/* Trending Topics */}
+          {trendingTopics.length > 0 && (
+            <TrendingTopics trends={trendingTopics} />
+          )}
+          
           <AnimatePresence>
             <div className="space-y-10">
               {filteredArticles.map((article, index) => (
