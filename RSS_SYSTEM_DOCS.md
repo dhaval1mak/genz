@@ -48,6 +48,39 @@ Available categories:
 - Travel
 - Fashion
 
+## Current RSS Feed Sources
+
+The system currently includes **40+ RSS feeds** across multiple categories:
+
+### Technology (10 feeds):
+- TechCrunch, The Verge, Wired, Ars Technica, MIT Tech Review
+- The Next Web, Android Authority, 9to5Mac, Techmeme, Engadget
+
+### Gaming (7 feeds):
+- IGN, GameSpot, Polygon, Kotaku, PC Gamer, GameInformer, Rock Paper Shotgun
+
+### Entertainment (7 feeds):
+- Rolling Stone, Variety, Entertainment Weekly, The Hollywood Reporter
+- Billboard, Deadline, TMZ
+
+### Sports (7 feeds):
+- ESPN, Sports Illustrated, Bleacher Report, The Athletic
+- CBS Sports, Fox Sports, BBC Sport
+
+### Science (5 feeds):
+- Science Daily, Nature Technology, Scientific American
+- New Scientist, Space Headlines
+
+### Business (4 feeds):
+- CNBC, BBC Business, Investing.com, MarketWatch
+
+### World (10 feeds):
+- AP News, CNN Top Stories, NY Times, NBC News, ABC News
+- Reuters, NPR, Al Jazeera, Deutsche Welle, The Guardian
+
+### Politics (1 feed):
+- Politico
+
 ## Scheduling Options
 
 In `rssScheduler.mjs`, you can set the update frequency:

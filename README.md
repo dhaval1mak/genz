@@ -14,14 +14,16 @@ A modern, AI-powered news aggregator that transforms traditional news into Gen-Z
   - Comment system with name/email
   - Share functionality
   - Real-time reactions
+  - Live article counter with statistics
 
 - **SEO & Crawlability**:
   - Individual article pages with unique URLs (slugs)
   - Optimized meta tags and structured data
   - Dynamic sitemap generation for search engines
+  - Static HTML generation for better indexing
   
 - **Automated Content Pipeline**:
-  - Advanced RSS feed aggregation from 25+ trusted sources
+  - Advanced RSS feed aggregation from 40+ trusted sources
   - Intelligent scheduling based on source update patterns
   - Gemini AI-powered content rewriting with robust fallback mechanisms
   - Category-specific default images for visual consistency
@@ -39,15 +41,25 @@ A modern, AI-powered news aggregator that transforms traditional news into Gen-Z
   - Infinite scroll loading
   - Intersection Observer API
   - Optimized for mobile devices
+  - Code splitting and lazy loading
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18, TypeScript, Vite
 - **Styling**: Tailwind CSS, Framer Motion
-- **Database**: Supabase
+- **Database**: Supabase (PostgreSQL)
 - **AI**: Gemini API / OpenAI GPT-3.5
 - **Icons**: Lucide React
-- **Deployment**: Vercel
+- **Deployment**: Vercel, Netlify
+- **Automation**: GitHub Actions
+
+## 📊 Current Status
+
+- **Total Articles**: 952+ articles in database
+- **RSS Sources**: 40+ curated news sources
+- **Categories**: Technology, Gaming, Entertainment, Sports, Science, Business, World, Politics
+- **SEO**: Fully optimized with automatic indexing
+- **Performance**: 90+ Lighthouse score
 
 ## 🚀 Getting Started
 
@@ -80,59 +92,11 @@ Fill in your Supabase and AI API credentials in `.env`.
 
 4. Set up Supabase database:
 
-Create the following tables in your Supabase dashboard:
+The database schema is automatically created through migrations. Run the migrations in your Supabase dashboard:
 
 ```sql
--- Articles table
-CREATE TABLE articles (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  normal TEXT NOT NULL,
-  genz TEXT NOT NULL,
-  alpha TEXT NOT NULL,
-  image_url TEXT,
-  category TEXT NOT NULL,
-  published_at TIMESTAMPTZ DEFAULT NOW(),
-  original_url TEXT,
-  slug TEXT UNIQUE NOT NULL,
-  likes_normal INTEGER DEFAULT 0,
-  likes_genz INTEGER DEFAULT 0,
-  likes_alpha INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Comments table
-CREATE TABLE comments (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  article_id UUID REFERENCES articles(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  text TEXT NOT NULL,
-  style_version TEXT CHECK (style_version IN ('normal', 'genz', 'alpha')),
-  timestamp TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Likes table
-CREATE TABLE likes (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  article_id UUID REFERENCES articles(id) ON DELETE CASCADE,
-  user_ip TEXT NOT NULL,
-  style_version TEXT CHECK (style_version IN ('normal', 'genz', 'alpha')),
-  timestamp TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(article_id, user_ip, style_version)
-);
-
--- Enable RLS
-ALTER TABLE articles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
-ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
-
--- RLS Policies
-CREATE POLICY "Articles are viewable by everyone" ON articles FOR SELECT USING (true);
-CREATE POLICY "Comments are viewable by everyone" ON comments FOR SELECT USING (true);
-CREATE POLICY "Anyone can insert comments" ON comments FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone can insert likes" ON likes FOR INSERT WITH CHECK (true);
-CREATE POLICY "Likes are viewable by everyone" ON likes FOR SELECT USING (true);
+-- The migrations are located in supabase/migrations/
+-- They will create all necessary tables and policies
 ```
 
 5. Start the development server:
@@ -148,14 +112,16 @@ npm run dev
 2. **Switch Styles**: Use the toggle tabs to switch between Normal, Gen-Z, and Alpha versions
 3. **Engage**: Like articles, leave comments, and share content
 4. **Filter**: Use trending and latest filters to find relevant content
+5. **Track Progress**: View live article counter and statistics
 
 ### For Admins
 
 The system is designed to automatically:
-1. Fetch RSS feeds daily
+1. Fetch RSS feeds every 4 hours
 2. Process content through AI APIs
 3. Store rewritten articles in the database
-4. Present them in the user interface
+4. Generate static HTML for SEO
+5. Update sitemaps and submit to search engines
 
 ## 🔧 Configuration
 
@@ -176,11 +142,16 @@ Output: JSON with 'normal', 'genz', 'alpha' keys`;
 
 ### RSS Feeds
 
-Add your RSS feed URLs to the system. The application will:
-- Fetch feeds daily
-- Extract article content
-- Process through AI APIs
-- Store in database
+The system includes 40+ RSS feeds across multiple categories:
+
+- **Technology**: TechCrunch, The Verge, Wired, Ars Technica, MIT Tech Review
+- **Gaming**: IGN, GameSpot, Polygon, Kotaku, PC Gamer
+- **Entertainment**: Rolling Stone, Variety, Entertainment Weekly, Vulture
+- **Sports**: ESPN, BBC Sport, CBS Sports, Sky Sports
+- **Science**: Science Daily, Scientific American, New Scientist, Nature
+- **Business**: CNBC, BBC Business, MarketWatch, Investing.com
+- **World**: AP News, Reuters, NPR, The Guardian, Al Jazeera
+- **Politics**: Politico, BBC Politics
 
 ## 🎨 Design System
 
@@ -199,6 +170,7 @@ Add your RSS feed URLs to the system. The application will:
 - **ToggleTabs**: Style switcher with smooth animations
 - **ReactionBar**: Like, comment, share interactions
 - **CommentBox**: User comment input system
+- **ArticleCounter**: Live statistics display
 
 ## 🚀 Deployment
 
@@ -266,6 +238,7 @@ You can also specify a custom commit message:
 - **Core Web Vitals**: Optimized for mobile
 - **Bundle Size**: Code-split and optimized
 - **Loading**: Infinite scroll with intersection observer
+- **SEO**: Automatic indexing every 4 hours
 
 ## 🔍 SEO & Crawlability
 
@@ -377,7 +350,7 @@ The project includes a robust RSS feed processing system that automatically fetc
 
 ### Features
 
-- **Multiple News Sources**: 25+ curated RSS feeds across various categories
+- **Multiple News Sources**: 40+ curated RSS feeds across various categories
 - **AI-Powered Content Transformation**: Uses Gemini API to rewrite content in three styles
 - **Intelligent Scheduling**: Analyzes feed update patterns to optimize fetching frequency
 - **Fallback Mechanisms**: Robust error handling and content fallbacks
@@ -395,6 +368,20 @@ npm run schedule-rss
 # Analyze RSS feed update patterns
 npm run analyze-rss
 ```
+
+## 📈 Analytics & Statistics
+
+### Article Counter
+- Live display of total articles in database
+- Shows newly added articles since last update
+- Updates automatically every 5 minutes
+- Integrated with RSS processing system
+
+### Site Statistics
+- Database-driven statistics tracking
+- Automatic updates via database triggers
+- API endpoint for real-time data
+- Fallback mechanisms for reliability
 
 ## 🤝 Contributing
 

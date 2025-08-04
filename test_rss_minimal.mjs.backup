@@ -123,8 +123,8 @@ function generateSlug(title, category) {
     .replace(/(^-|-$)/g, '')
     .substring(0, 50);
     
-  // Removed timestamp for cleaner URLs
-  return `${baseSlug}-${category.toLowerCase()}`;
+  const timestamp = Date.now().toString().slice(-6);
+  return `${baseSlug}-${category.toLowerCase()}-${timestamp}`;
 }
 
 function getDefaultImage(category) {

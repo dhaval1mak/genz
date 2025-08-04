@@ -199,10 +199,10 @@ function generateSlug(title, category) {
     .replace(/(^-|-$)/g, '')
     .substring(0, 50);
     
-  // Removed timestamp for cleaner URLs
-  // Removed timestamp generation
+  const date = new Date();
+  const timestamp = `${date.getMonth() + 1}${date.getDate()}${date.getHours()}${date.getMinutes()}`;
   
-  return `${baseSlug}-${category.toLowerCase()}`;
+  return `${baseSlug}-${category.toLowerCase()}-${timestamp}`;
 }
 
 function getDefaultImage(category) {

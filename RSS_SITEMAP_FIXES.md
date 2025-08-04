@@ -4,15 +4,15 @@
 
 ### 1. **Sitemap showing only one URL instead of 900+ articles**
 
-**Problem**: The `sitemap.xml` file was a static file with only 7 URLs, while the database contained 913 articles.
+**Problem**: The `sitemap.xml` file was a static file with only 7 URLs, while the database contained 947 articles.
 
 **Solution**: 
 - ✅ Updated `updateSitemap.mjs` to properly fetch all articles from the database
-- ✅ Generated a complete sitemap with 918 URLs (5 static + 913 articles)
+- ✅ Generated a complete sitemap with 952 URLs (5 static + 947 articles)
 - ✅ Created `copy_sitemap.mjs` to copy the generated sitemap from `dist/` to root
 - ✅ Updated GitHub Actions workflow to include the copy step
 
-**Result**: Sitemap now contains all 913+ articles with proper URLs, lastmod dates, and priorities.
+**Result**: Sitemap now contains all 947+ articles with proper URLs, lastmod dates, and priorities.
 
 ### 2. **RSS Feed Processing Errors**
 
@@ -58,7 +58,7 @@
 4. **`RSS_SITEMAP_FIXES.md`** - This documentation
 
 ### Modified Files:
-1. **`sitemap.xml`** - Now contains all 918 URLs (updated from 7)
+1. **`sitemap.xml`** - Now contains all 952 URLs (updated from 7)
 2. **`.github/workflows/scheduled-rss.yml`** - Fixed workflow issues
 3. **`updateSitemap.mjs`** - Already working correctly
 
@@ -92,7 +92,7 @@ node processRSSFeeds-optimized.mjs
 
 ## Current Status
 
-✅ **Sitemap**: Fixed - now shows 918 URLs (913 articles + 5 static pages)
+✅ **Sitemap**: Fixed - now shows 952 URLs (947 articles + 5 static pages)
 ✅ **RSS Processing**: Improved - better error handling, retry logic, fallbacks
 ✅ **GitHub Actions**: Fixed - proper artifact handling, updated scripts
 ✅ **Environment Variables**: Proper validation and error messages
@@ -101,25 +101,31 @@ node processRSSFeeds-optimized.mjs
 
 The optimized script now uses these reliable feeds:
 
-### Technology (8 feeds):
-- TechCrunch, The Verge, Engadget, Ars Technica, The Next Web, Android Authority, 9to5Mac, Techmeme
+### Technology (10 feeds):
+- TechCrunch, The Verge, Engadget, Ars Technica, The Next Web, Android Authority, 9to5Mac, Techmeme, Wired, MIT Tech Review
 
-### Business (3 feeds):
-- CNBC, BBC Business, MarketWatch
+### Business (4 feeds):
+- CNBC, BBC Business, MarketWatch, Investing.com
 
-### World News (5 feeds):
-- AP News, NBC News, Reuters, NPR, The Guardian
+### World News (10 feeds):
+- AP News, NBC News, Reuters, NPR, The Guardian, CNN Top Stories, NY Times, ABC News, Al Jazeera, Deutsche Welle
 
-### Sports (2 feeds):
-- ESPN, BBC Sport
+### Sports (7 feeds):
+- ESPN, BBC Sport, CBS Sports, Sky Sports, Sporting News, Guardian Football, RotoWire
 
-### Science (3 feeds):
-- Science Daily, Scientific American, New Scientist
+### Science (5 feeds):
+- Science Daily, Scientific American, New Scientist, Nature Technology, Space Headlines
 
-### Entertainment (2 feeds):
-- Rolling Stone, Vulture
+### Entertainment (7 feeds):
+- Rolling Stone, Vulture, NY Times Arts, Pitchfork, Variety, Entertainment Weekly, The Hollywood Reporter
 
-**Total**: 23 reliable feeds (reduced from 40+ to focus on most stable sources)
+### Gaming (7 feeds):
+- IGN, GameSpot, Polygon, Kotaku, PC Gamer, GameInformer, Rock Paper Shotgun
+
+### Politics (1 feed):
+- Politico
+
+**Total**: 51 reliable feeds across 8 categories
 
 ## Next Steps
 
