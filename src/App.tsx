@@ -13,6 +13,7 @@ const FeedScroller = lazy(() => import(/* webpackChunkName: "feed" */ './compone
 const ArticlePage = lazy(() => import(/* webpackChunkName: "article" */ './components/ArticlePage'));
 const ProfilePage = lazy(() => import(/* webpackChunkName: "profile" */ './components/ProfilePage'));
 const PublicLandingPage = lazy(() => import(/* webpackChunkName: "landing" */ './components/PublicLandingPage'));
+const NotFound = lazy(() => import(/* webpackChunkName: "notfound" */ './components/NotFound'));
 
 type StyleType = 'normal' | 'genz' | 'alpha';
 
@@ -255,8 +256,11 @@ export default function App() {
               } 
             />
             
+            {/* 404 Route */}
+            <Route path="/404" element={<NotFound />} />
+            
             {/* Catch all route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
           </Routes>
         </Suspense>
 

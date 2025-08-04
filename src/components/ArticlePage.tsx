@@ -47,11 +47,13 @@ export default function ArticlePage({ user, userPreferences, onSignOut }: Articl
       if (data) {
         setArticle(data);
       } else {
-        navigate('/');
+        // Article not found - redirect to 404
+        navigate('/404');
       }
     } catch (error) {
       console.error('Error loading article:', error);
-      navigate('/');
+      // On error, also redirect to 404
+      navigate('/404');
     } finally {
       setLoading(false);
     }
